@@ -21,7 +21,7 @@ else()
 endif()
 set(LASERC_DEFAULT_TARGET_TRIPLE ${LASERC_DEFAULT_TARGET_TRIPLE_INIT} CACHE STRING "The default target to build when invoking laserc without --target")
 mark_as_advanced(LASERC_DEFAULT_TARGET_TRIPLE)
-set_property(CACHE LASERC_DEFAULT_TARGET_TRIPLE STRINGS ${LASERC_TARGET_TRIPLES})
+set_property(CACHE LASERC_DEFAULT_TARGET_TRIPLE PROPERTY STRINGS ${LASERC_TARGET_TRIPLES})
 
 message(STATUS "Building Laserc on host: ${LASERC_HOST_TRIPLE}")
 message(STATUS "Building laser targets for: ${LASERC_TARGETS_TRIPLE}")
