@@ -1,8 +1,32 @@
 cmake_minimum_required(VERSION 3.15)
 project(laserc-bootstrap CXX)
 
+set(LLVM_ENABLE_PROJECTS "" CACHE STRING "Subprojects to be built with llvm")
 option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc" OFF)
 
 add_subdirectory(llvm-project/llvm)
 
+set(LASERC_HOST_TRIPLE ${LLVM_HOST_TRIPLE})
+
+set(LASERC_TARGET_TRIPLES ${LASERC_HOST_TRIPLE} CACHE STRING "The list of laser targets to compile the standard library for")
+
+list(FIND LASERC_TARGET_TRIPLES ${LASERC_HOST_TRIPLE} _LASERC_TARGET_HOST_POS)
+
+if(_LASERC_TARGET_HOST_POS GREATER -1)
+    set(LASERC_DEFAULT_TARGET_TRIPLE_INIT ${LASERC_HOST_TRIPLE})
+    # If the target list contains the host, set the default target triple to the host triple
+else()
+    list(GET LASERC_TARGET_TRIPLES 0 LASERC_DEFAULT_TARGET_TRIPLE_INIT)
+    # Otherwise, use the first triple by default
+endif()
+set(LASERC_DEFAULT_TARGET_TRIPLE ${LASERC_DEFAULT_TARGET_TRIPLE_INIT} CACHE STRING "The default target to build when invoking laserc without --target")
+mark_as_advanced(LASERC_DEFAULT_TARGET_TRIPLE)
+set_property(CACHE LASERC_DEFAULT_TARGET_TRIPLE STRINGS ${LASERC_TARGET_TRIPLES})
+
+message(STATUS "Building Laserc on host: ${LASERC_HOST_TRIPLE}")
+message(STATUS "Building laser targets for: ${LASERC_TARGETS_TRIPLE}")
+message(STATUS "Compiling for ${LASERC_DEFAULT_TARGET_TRIPLE} by default")
+
 add_executable(laserc-bootstrap src/main.cpp)
+
+
