@@ -21,8 +21,8 @@ jobs:
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
-      string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-      message("::set-output name=timestamp::${current_date}")
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          message("::set-output name=timestamp::${current_date}")
     
     - name: ccache cache files
       uses: actions/cache@v1.1.0
@@ -30,7 +30,7 @@ jobs:
           path: ${{runner.workspace}}/build-clang/.ccache
           key: ${ { matrix.config.name } }-ccache-clang-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
           restore-keys: |
-          ${ { matrix.config.name } }-ccache-clang-
+           ${ { matrix.config.name } }-ccache-clang-
         
     - name: Clang Build
       uses: ashutoshvarma/action-cmake-build@v1
@@ -58,8 +58,8 @@ jobs:
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
-      string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-      message("::set-output name=timestamp::${current_date}")
+       string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+       message("::set-output name=timestamp::${current_date}")
     
     - name: ccache cache files
       uses: actions/cache@v1.1.0
