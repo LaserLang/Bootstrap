@@ -5,5 +5,4 @@ option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc
 
 add_subdirectory(llvm-project/llvm)
 
-
-
+add_executable(laserc-bootstrap src/main.cpp)
