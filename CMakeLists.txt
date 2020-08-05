@@ -23,12 +23,17 @@ set(LASERC_DEFAULT_TARGET_TRIPLE ${LASERC_DEFAULT_TARGET_TRIPLE_INIT} CACHE STRI
 mark_as_advanced(LASERC_DEFAULT_TARGET_TRIPLE)
 set_property(CACHE LASERC_DEFAULT_TARGET_TRIPLE PROPERTY STRINGS ${LASERC_TARGET_TRIPLES})
 
+list(JOIN LASERC_TARGET_TRIPLES ", " _laser_target_commas)
+
 message(STATUS "Building Laserc on host: ${LASERC_HOST_TRIPLE}")
-message(STATUS "Building laser targets for: ${LASERC_TARGETS_TRIPLE}")
+message(STATUS "Building laser targets for: ${_laser_target_commas}")
 message(STATUS "Compiling for ${LASERC_DEFAULT_TARGET_TRIPLE} by default")
 
-add_executable(laserc-bootstrap src/main.cpp src/token.cpp)
-set_property(TARGET laserc-bootstrap PROPERTY CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_executable(laserc-bootstrap src/main.cpp)
 
 target_link_libraries(laserc-bootstrap LLVMCore)
 
