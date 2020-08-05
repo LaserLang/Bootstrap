@@ -27,10 +27,10 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: .ccache
-          key: ${ { matrix.config.name } }-ccache-clang-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
+          path: ${{runner.workspace}/build-clang/.ccache
+          key: ${{matrix.config.name}}-ccache-clang-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys: |
-           ${ { matrix.config.name } }-ccache-clang-
+           ${{matrix.config.name}}-ccache-clang-
         
     - name: Clang Build
       uses: ashutoshvarma/action-cmake-build@v1
@@ -43,7 +43,7 @@ jobs:
         parallel: 32
         build-dir: ${{runner.workspace}}/build-clang 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_APPEND_VC_REV=OFF
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/build-clang/.ccache -DLLVM_APPEND_VC_REV=OFF
   build_gcc:
     runs-on: ubuntu-latest
     steps:
@@ -64,10 +64,10 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: .ccache
-          key: ${ { matrix.config.name } }-ccache-gcc-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
+          path: ${{runner.workspace}}/build-gcc/.ccache
+          key: ${{matrix.config.name}}-ccache-gcc-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys:  |
-            ${ { matrix.config.name } }-ccache-gcc-
+            ${{matrix.config.name}}-ccache-gcc-
         
     - name: Clang Build
       uses: ashutoshvarma/action-cmake-build@v1
@@ -80,4 +80,4 @@ jobs:
         parallel: 32
         build-dir: ${{runner.workspace}}/build-gcc
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_APPEND_VC_REV=OFF
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/build-gcc/.ccache -DLLVM_APPEND_VC_REV=OFF
