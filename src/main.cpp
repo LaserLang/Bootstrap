@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
         std::cout << argv[i];
         if (i < argc - 1)
             std::cout << ", ";
-        else
-            std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
