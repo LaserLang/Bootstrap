@@ -27,7 +27,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: ${{runner.workspace}}/.ccache
+          path: ${{github.workspace}}/.ccache
           key: ${{matrix.config.name}}-ccache-clang-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys: |
            ${{matrix.config.name}}-ccache-clang-
@@ -41,7 +41,7 @@ jobs:
         cxx: clang++ # optional
         update-submodules: true
         parallel: 32
-        build-dir: ${{runner.workspace}}/build-clang 
+        build-dir: ${{github.workspace}}/build-clang 
         build-type: Release
         configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF
   build_gcc:
@@ -64,7 +64,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: ${{runner.workspace}}/.ccache
+          path: ${{github.workspace}}/.ccache
           key: ${{matrix.config.name}}-ccache-gcc-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys: |
            ${{matrix.config.name}}-ccache-gcc-
@@ -78,6 +78,6 @@ jobs:
         cxx: g++ # optional
         update-submodules: true
         parallel: 32
-        build-dir: ${{runner.workspace}}/build-gcc 
+        build-dir: ${{github.workspace}}/build-gcc 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF
