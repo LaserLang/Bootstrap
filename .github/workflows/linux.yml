@@ -27,7 +27,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: ${{runner.workspace}/build-clang/.ccache
+          path: .ccache
           key: ${{matrix.config.name}}-ccache-clang-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys: |
            ${{matrix.config.name}}-ccache-clang-
@@ -43,7 +43,7 @@ jobs:
         parallel: 32
         build-dir: ${{runner.workspace}}/build-clang 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/build-clang/.ccache -DLLVM_APPEND_VC_REV=OFF
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_APPEND_VC_REV=OFF
   build_gcc:
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +64,7 @@ jobs:
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
-          path: ${{runner.workspace}}/build-gcc/.ccache
+          path: .ccache
           key: ${{matrix.config.name}}-ccache-gcc-${{steps.ccache_cache_timestamp.outputs.timestamp}}
           restore-keys:  |
             ${{matrix.config.name}}-ccache-gcc-
@@ -80,4 +80,4 @@ jobs:
         parallel: 32
         build-dir: ${{runner.workspace}}/build-gcc
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/build-gcc/.ccache -DLLVM_APPEND_VC_REV=OFF
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_APPEND_VC_REV=OFF
