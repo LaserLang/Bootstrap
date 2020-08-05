@@ -27,7 +27,8 @@ message(STATUS "Building Laserc on host: ${LASERC_HOST_TRIPLE}")
 message(STATUS "Building laser targets for: ${LASERC_TARGETS_TRIPLE}")
 message(STATUS "Compiling for ${LASERC_DEFAULT_TARGET_TRIPLE} by default")
 
-add_executable(laserc-bootstrap src/main.cpp)
+add_executable(laserc-bootstrap src/main.cpp src/token.cpp)
+set_property(TARGET laserc-bootstrap PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(laserc-bootstrap LLVMCore)
 
