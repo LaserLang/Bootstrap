@@ -4,7 +4,7 @@ project(laserc-bootstrap CXX)
 set(LLVM_ENABLE_PROJECTS "" CACHE STRING "Subprojects to be built with llvm")
 option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc" OFF)
 
-add_subdirectory(llvm-project/llvm)
+add_subdirectory(llvm-project/llvm EXCLUDE_FROM_ALL)
 
 set(LASERC_HOST_TRIPLE ${LLVM_HOST_TRIPLE})
 
@@ -29,4 +29,5 @@ message(STATUS "Compiling for ${LASERC_DEFAULT_TARGET_TRIPLE} by default")
 
 add_executable(laserc-bootstrap src/main.cpp)
 
+target_link_libraries(laserc-bootstrap LLVMCore)
 
