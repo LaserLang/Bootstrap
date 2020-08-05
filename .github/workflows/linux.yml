@@ -58,18 +58,18 @@ jobs:
       id: ccache_cache_timestamp
       shell: cmake -P {0}
       run: |
-       string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-       message("::set-output name=timestamp::${current_date}")
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          message("::set-output name=timestamp::${current_date}")
     
     - name: ccache cache files
       uses: actions/cache@v1.1.0
       with:
           path: ${{runner.workspace}}/.ccache
           key: ${{matrix.config.name}}-ccache-gcc-${{steps.ccache_cache_timestamp.outputs.timestamp}}
-          restore-keys:  |
-            ${{matrix.config.name}}-ccache-gcc-
+          restore-keys: |
+           ${{matrix.config.name}}-ccache-gcc-
         
-    - name: Clang Build
+    - name: GCC Build
       uses: ashutoshvarma/action-cmake-build@v1
       with:
         # C Compiler for toolchain
@@ -78,6 +78,6 @@ jobs:
         cxx: g++ # optional
         update-submodules: true
         parallel: 32
-        build-dir: ${{runner.workspace}}/build-gcc
+        build-dir: ${{runner.workspace}}/build-gcc 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/.ccache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=8
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{runner.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF
