@@ -43,7 +43,7 @@ jobs:
         parallel: 32
         build-dir: ${{github.workspace}}/build-clang 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=4
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.ccache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=4
   build_gcc:
     runs-on: ubuntu-latest
     steps:
@@ -80,4 +80,4 @@ jobs:
         parallel: 32
         build-dir: ${{github.workspace}}/build-gcc 
         build-type: Release
-        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.cache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=4
+        configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.ccache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=4
