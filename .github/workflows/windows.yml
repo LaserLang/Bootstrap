@@ -17,7 +17,7 @@ jobs:
       - name: Install packages
         uses: crazy-max/ghaction-chocolatey@v1
         with:
-          args: install llvm ninja ccache
+          args: install llvm ninja ccache clang
 
       - name: Prepare ccache timestamp
         id: ccache_cache_timestamp
