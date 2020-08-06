@@ -4,14 +4,14 @@
 
 using namespace laserc;
 
-uint64_t Token::get_line() const noexcept {
+uint64_t token::get_line() const noexcept {
     return line;
 }
 
-uint32_t Token::get_column() const noexcept {
+uint32_t token::get_column() const noexcept {
     return column;
 }
 
-std::string_view Token::get_text() const noexcept {
+std::string_view token::get_text() const noexcept {
     return text;
 }

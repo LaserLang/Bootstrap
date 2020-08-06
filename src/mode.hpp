@@ -8,7 +8,7 @@
 namespace laserc
 {
 
-enum class CompilerMode
+enum class compiler_mode
 {
     CompileAndLink,  // Produce final binary, according to LinkType
     GenerateObjects, // Produce object files for linking, may include joined-module form.
@@ -19,7 +19,7 @@ enum class CompilerMode
                      // by a combination of laserc runs using -c/--compile-only, and --check.
 };
 
-enum class LinkType
+enum class link_type
 {
     Exec,
     JoinedModule, // .lslib

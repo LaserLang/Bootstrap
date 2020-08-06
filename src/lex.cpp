@@ -5,8 +5,8 @@
 
 using namespace laserc;
 
-std::vector<Token> laserc::lex(std::istream &file)
+std::vector<token> laserc::lex(std::istream &file)
 {
-    std::vector<Token> result;
+    std::vector<token> result;
     return result;
 }

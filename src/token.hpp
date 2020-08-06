@@ -7,7 +7,7 @@
 
 namespace laserc {
 
-class Token {
+class token {
 private:
     uint64_t line;
     uint32_t column;

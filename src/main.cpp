@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     std::vector<std::string_view> opts(argv,argv+argc);
     std::string_view output{};
     std::vector<std::string_view> input_files{};
-    laserc::CompilerMode mode{laserc::CompilerMode::CompileAndLink};
-    laserc::LinkType output_type{laserc::LinkType::Exec};
+    laserc::CompilerMode mode{laserc::compiler_mode::CompileAndLink};
+    laserc::LinkType output_type{laserc::link_type::Exec};
     std::string_view default_linker{LASERC_DEFAULT_LINKER};
     llvm::Triple target{LASERC_DEFAULT_TRIPLE};
     for(auto it = begin(opts); it != end(opts); it++) // ADL too OP
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     // FIXME: TEMPORARY CODE UNTIL OPTION PARSING IS DONE
     std::ifstream file(argv[1], std::ios::in);
     if(file.is_open()) return 1;
-    std::vector tokens = lex(file);
+    std::vector<token> tokens = lex(file);
     file.close();
     return 0;
 }
