@@ -3,6 +3,7 @@ project(laserc-bootstrap CXX)
 
 set(LASERC_VERSION 0.1)
 
+set(LLVM_ABI_BREAKING_CHECKS FORCE_OFF CACHE STRING "By default, disable ABI breaking checks")
 set(LLVM_ENABLE_PROJECTS "" CACHE STRING "Subprojects to be built with llvm")
 option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc" OFF)
 
@@ -45,5 +46,5 @@ add_executable(laserc-bootstrap src/main.cpp src/token.cpp src/token.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)
 
-target_link_libraries(laserc-bootstrap LLVMCore)
+target_link_libraries(laserc-bootstrap LLVMCore LLVMTarget)
 
