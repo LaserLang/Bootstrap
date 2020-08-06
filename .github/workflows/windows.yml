@@ -15,7 +15,9 @@ jobs:
         with:
           submodules: true
       - name: Install packages
-        run: choco install llvm ninja ccache
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install llvm ninja ccache
 
       - name: Prepare ccache timestamp
         id: ccache_cache_timestamp
