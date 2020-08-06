@@ -46,7 +46,7 @@ add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.c
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)
 
-target_include_directories(laserc-bootstrap PRIVATE llvm-project/include)
+target_include_directories(laserc-bootstrap PRIVATE llvm-project/llvm/include)
 
 target_link_libraries(laserc-bootstrap LLVMCore LLVMTarget)
 
