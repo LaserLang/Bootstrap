@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string_view>
 #include <vector>
@@ -5,8 +6,10 @@
 
 #include <Config.hpp>
 
+#include "lex.hpp"
 #include "mode.hpp"
 
+using namespace laserc;
 
 int main(int argc, char *argv[])
 {
@@ -17,8 +20,15 @@ int main(int argc, char *argv[])
     laserc::LinkType output_type{laserc::LinkType::Exec};
     std::string_view default_linker{LASERC_DEFAULT_LINKER};
     llvm::Triple target{LASERC_DEFAULT_TRIPLE};
-    for(auto it = begin(opts); it!=end(opts); it++) // ADL too OP
+    for(auto it = begin(opts); it != end(opts); it++) // ADL too OP
     {
 
     }
+
+    // FIXME: TEMPORARY CODE UNTIL OPTION PARSING IS DONE
+    std::ifstream file(argv[1], std::ios::in);
+    if(file.is_open()) return 1;
+    std::vector tokens = lex(file);
+    file.close();
+    return 0;
 }
