@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LASERC_TOKEN_HPP
+#define LASERC_TOKEN_HPP
 
 #include <cstdint>
 
@@ -19,3 +20,5 @@ public:
 };
 
 }
+
+#endif // LASERC_TOKEN_HPP
