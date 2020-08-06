@@ -12,11 +12,10 @@ private:
     uint32_t column;
     std::string_view text;
 public:
-    Token() = delete;
-    Token(uint64_t line, uint32_t column, std::string_view text) : line(line), column(column), text(text) {}
-    uint64_t get_line();
-    uint32_t get_column();
-    std::string_view get_text();
+    Token(uint64_t line, uint32_t column, std::string_view text) noexcept : line(line), column(column), text(text) {}
+    [[nodiscard]] uint64_t get_line()const noexcept;
+    [[nodiscard]] uint32_t get_column()const noexcept;
+    [[nodiscard]] std::string_view get_text()const noexcept;
 };
 
 }
