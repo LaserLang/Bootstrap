@@ -45,4 +45,4 @@ jobs:
           parallel: 8
           build-dir: ${{github.workspace}}/build-windows
           build-type: Release
-          configure-options: -GNinja -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.ccache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=2
+          configure-options: -DLLVM_CCACHE_BUILD=ON -DLLVM_CCACHE_DIR=${{github.workspace}}/.ccache -DLLVM_APPEND_VC_REV=OFF -DLLVM_PARALLEL_LINK_JOBS=2
