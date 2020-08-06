@@ -7,7 +7,7 @@ set(LLVM_ABI_BREAKING_CHECKS FORCE_OFF CACHE STRING "By default, disable ABI bre
 set(LLVM_ENABLE_PROJECTS "" CACHE STRING "Subprojects to be built with llvm")
 option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc" OFF)
 
-add_subdirectory(llvm-project/llvm EXCLUDE_FROM_ALL)
+add_subdirectory(llvm-project/llvm)
 
 set(LASERC_HOST_TRIPLE ${LLVM_HOST_TRIPLE})
 
