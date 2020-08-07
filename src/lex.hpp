@@ -9,7 +9,7 @@
 namespace laserc
 {
 
-std::vector<token> lex(std::istream &file);
+std::vector<token>* lex(std::istream &file);
 
 }
 

@@ -27,8 +27,18 @@ int main(int argc, char *argv[])
 
     // FIXME: TEMPORARY CODE UNTIL OPTION PARSING IS DONE
     std::ifstream file(argv[1], std::ios::in);
-    if(file.is_open()) return 1;
-    std::vector<token> tokens = lex(file);
+    if(file.is_open())
+        return 1;
+    std::vector<token> *tokens = lex(file);
     file.close();
+
+    std::cout << "Tokens: {" << std::endl;
+    for(token t : *tokens)
+    {
+        std::cout << "\t{" << t.get_line() << " " << t.get_column() << " \"" << t.get_line() << "\"}" << std::endl;
+    }
+    std::cout << "}" << std::endl;
+
+    delete tokens;
     return 0;
 }
