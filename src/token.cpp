@@ -1,6 +1,6 @@
 #include "token.hpp"
 
-#include <string_view>
+#include <string>
 
 using namespace laserc;
 
@@ -12,6 +12,6 @@ uint32_t token::get_column() const noexcept {
     return column;
 }
 
-std::string_view token::get_text() const noexcept {
+std::string token::get_text() const noexcept {
     return text;
 }

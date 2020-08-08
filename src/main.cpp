@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <string_view>
 #include <vector>
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 
     // FIXME: TEMPORARY CODE UNTIL OPTION PARSING IS DONE
     std::ifstream file(argv[1], std::ios::in);
-    if(file.is_open())
+    if(!file.is_open())
         return 1;
     std::vector<token> *tokens = lex(file);
     file.close();
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     std::cout << "Tokens: {" << std::endl;
     for(token t : *tokens)
     {
-        std::cout << "\t{" << t.get_line() << " " << t.get_column() << " \"" << t.get_line() << "\"}" << std::endl;
+        std::cout << "\t{" << t.get_line() << " " << t.get_column() << " " << std::quoted(t.get_text()) << "}" << std::endl;
     }
     std::cout << "}" << std::endl;
 

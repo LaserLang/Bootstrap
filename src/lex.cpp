@@ -5,8 +5,89 @@
 
 using namespace laserc;
 
+static char nextc(uint64_t &line, uint32_t &col, std::istream &file) {
+    char next; file.get(next);
+    if(next == '\n')
+    {
+        line++;
+        col = 0;
+    }
+    col++; // If newline, sets col to 1
+    if(file.eof()) return 0; // Nobody is going to sensibly put a \0 in their code, and if they do, it should validly be EOF.
+    return next;
+}
+
 std::vector<token>* laserc::lex(std::istream &file)
 {
     auto result = new std::vector<token>();
+    uint64_t line = 1; // Why no 0 index? AAAA
+    uint32_t col = 1;  // AAAA AAAA
+
+    uint64_t cur_line = line;
+    uint32_t cur_col = col;
+    char curc = nextc(line, col, file);
+    while(curc) {
+        if(
+            curc == '{' ||
+            curc == '}' ||
+            curc == '(' ||
+            curc == ')' ||
+            curc == ';' ||
+            curc == ',' ||
+            curc == '.' ||
+            curc == '\'' ||
+            curc == '"')
+        {
+            std::string data(1, curc);
+            token t{cur_line, cur_col, data};
+            result->push_back(t);
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+        }
+        else if(
+            curc == '=' ||
+            curc == '+' ||
+            curc == '-' ||
+            curc == '*' ||
+            curc == '%' ||
+            curc == '^' ||
+            curc == '!' ||
+            curc == '~')
+        {
+            std::string tok_str(1, curc);
+            uint64_t tmp_cur_line = cur_line;
+            uint32_t tmp_cur_col = cur_col;
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+            if(curc == '=')
+            {
+                tok_str.push_back(curc);
+                token t{tmp_cur_line, tmp_cur_col, tok_str};
+                result->push_back(t);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
+            }
+            else
+            {
+                token t{tmp_cur_line, tmp_cur_col, tok_str};
+                result->push_back(t);
+            }
+        }
+        else if(
+            curc == ' ' ||
+            curc == '\t' ||
+            curc == '\r' || // If the C++ stl does it's job, this shouldn't be a problem.
+            curc == '\n'
+        )
+        {
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+        }
+    }
+
     return result;
 }

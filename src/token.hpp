@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include <string_view>
+#include <string>
 
 namespace laserc {
 
@@ -11,12 +11,12 @@ class token {
 private:
     uint64_t line;
     uint32_t column;
-    std::string_view text;
+    std::string text;
 public:
-    token(uint64_t line, uint32_t column, std::string_view text) noexcept : line(line), column(column), text(text) {}
+    token(uint64_t line, uint32_t column, std::string text) noexcept : line(line), column(column), text(text) {}
     [[nodiscard]] uint64_t get_line() const noexcept;
     [[nodiscard]] uint32_t get_column() const noexcept;
-    [[nodiscard]] std::string_view get_text() const noexcept;
+    [[nodiscard]] std::string get_text() const noexcept;
 };
 
 }
