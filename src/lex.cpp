@@ -27,7 +27,7 @@ std::vector<token>* laserc::lex(std::istream &file)
     uint32_t cur_col = col;
     char curc = nextc(line, col, file);
     while(curc) {
-        if(
+        if( // <c>
             curc == '{' ||
             curc == '}' ||
             curc == '(' ||
@@ -45,10 +45,8 @@ std::vector<token>* laserc::lex(std::istream &file)
             cur_col = col;
             curc = nextc(line, col, file);
         }
-        else if(
+        else if( // <c>=, <c>
             curc == '=' ||
-            curc == '+' ||
-            curc == '-' ||
             curc == '*' ||
             curc == '%' ||
             curc == '^' ||
@@ -64,17 +62,64 @@ std::vector<token>* laserc::lex(std::istream &file)
             if(curc == '=')
             {
                 tok_str.push_back(curc);
-                token t{tmp_cur_line, tmp_cur_col, tok_str};
-                result->push_back(t);
                 cur_line = line;
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            else
+            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            result->push_back(t);
+        }
+        else if(curc == '/') // /=, //, /
+        {
+            std::string tok_str(1, curc);
+            uint64_t tmp_cur_line = cur_line;
+            uint32_t tmp_cur_col = cur_col;
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+            if(curc == '=')
             {
-                token t{tmp_cur_line, tmp_cur_col, tok_str};
-                result->push_back(t);
+                tok_str.push_back(curc);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
             }
+            else if(curc == '/')
+            {
+                tok_str.push_back(curc);
+                while(curc != '\n') // Nobody needs to know the contents of the comment
+                {
+                    cur_line = line;
+                    cur_col = col;
+                    curc = nextc(line, col, file);
+                }
+            } // I have not decided how to tokenize multilines yet
+            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            result->push_back(t);
+        }
+        else if( // <c><c>, <c>=, <c>
+            curc == '&' ||
+            curc == '|' ||
+            curc == '+' ||
+            curc == '-'
+        )
+        {
+            char firstc = curc;
+            std::string tok_str(1, curc);
+            uint64_t tmp_cur_line = cur_line;
+            uint32_t tmp_cur_col = cur_col;
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+            if(curc == '=' || curc == firstc)
+            {
+                tok_str.push_back(curc);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
+            }
+            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            result->push_back(t);
         }
         else if(
             curc == ' ' ||
