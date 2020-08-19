@@ -1,5 +1,5 @@
 {
-	+ + - *= ++--/= // This is a test to make sure comments are unchecked correctly.
+	4 /= 1 + 1 / 2 * 3 // This is a test to make sure comments are unchecked correctly.
 	// Meep
-	&& &= & 
+	4387129 && 02713 &= 234 & 0 
 }
