@@ -2,4 +2,6 @@
 	4 /= 1 + 1 / 2 * 3 // This is a test to make sure comments are unchecked correctly.
 	// Meep
 	4387129 && 02713 &= 234 & 0 
+  // Testing spaces in place of tabs now, sorry about bad formatting...
+  1 >>= (2 < 3) & ((354 & 125) >> 2) / 6;
 }

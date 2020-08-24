@@ -132,9 +132,35 @@ std::vector<token>* laserc::lex(std::istream &file)
             cur_col = col;
             curc = nextc(line, col, file);
         }
-        else if(curc >= '0' && curc <= '9')
+        else if(
+            curc == '>' ||
+            curc == '<'
+        )
         {
             char firstc = curc;
+            std::string tok_str(1, curc);
+            uint64_t tmp_cur_line = cur_line;
+            uint32_t tmp_cur_col = cur_col;
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+            if(curc == firstc) {
+                tok_str.push_back(curc);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
+            }
+            if(curc == '=') {
+                tok_str.push_back(curc);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
+            }
+            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            result->push_back(t);
+        }
+        else if(curc >= '0' && curc <= '9')
+        {
             std::string tok_str(1, curc);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
