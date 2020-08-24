@@ -177,6 +177,40 @@ std::vector<token>* laserc::lex(std::istream &file)
             token t{tmp_cur_line, tmp_cur_col, tok_str};
             result->push_back(t);
         }
+        else if(
+            (curc >= 'a' && curc <= 'z') ||
+            (curc >= 'A' && curc <= 'Z') ||
+            (curc == '_') ||
+            (curc == '$')
+        )
+        {
+            std::string tok_str(1, curc);
+            uint64_t tmp_cur_line = cur_line;
+            uint32_t tmp_cur_col = cur_col;
+            cur_line = line;
+            cur_col = col;
+            curc = nextc(line, col, file);
+            while(
+                (curc >= 'a' && curc <= 'z') ||
+                (curc >= 'A' && curc <= 'Z') ||
+                (curc >= '0' && curc <= '9') ||
+                (curc == '_') ||
+                (curc == '$')
+            )
+            {
+                tok_str.push_back(curc);
+                cur_line = line;
+                cur_col = col;
+                curc = nextc(line, col, file);
+            }
+            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            result->push_back(t);
+        }
+        else
+        {
+            std::cerr << "FATAL: Invalid character '" << curc << "'!";
+            throw "Invalid character"; // FIXME: Don't use exceptions
+        }
     }
 
     return result;
