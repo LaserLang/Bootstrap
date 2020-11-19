@@ -36,7 +36,7 @@ jobs:
             ${{matrix.config.name}}-ccache-windows-
 
       - name: Clang Build
-        uses: ashutoshvarma/action-cmake-build@v1
+        uses: LightningCreations/action-cmake-build@v1.2
         with:
           # C Compiler for toolchain
           cc: clang # optional
