@@ -5,11 +5,9 @@
 #ifndef LASERC_MODE_HPP
 #define LASERC_MODE_HPP
 
-namespace laserc
-{
+namespace laserc {
 
-enum class compiler_mode
-{
+enum class compiler_mode {
     CompileAndLink,  // Produce final binary, according to LinkType
     GenerateObjects, // Produce object files for linking, may include joined-module form.
     CompileOnly,     // Compile and typecheck to .lsm (IR format)
@@ -19,8 +17,7 @@ enum class compiler_mode
                      // by a combination of laserc runs using -c/--compile-only, and --check.
 };
 
-enum class link_type
-{
+enum class link_type {
     Exec,
     JoinedModule, // .lslib
     SharedModule, // .so/.dll, with a lslib section

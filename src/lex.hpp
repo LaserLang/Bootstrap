@@ -6,8 +6,7 @@
 
 #include "token.hpp"
 
-namespace laserc
-{
+namespace laserc {
 
 std::vector<token>* lex(std::istream &file);
 
