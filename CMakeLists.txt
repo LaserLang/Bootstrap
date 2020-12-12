@@ -9,7 +9,9 @@ option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc
 
 add_subdirectory(llvm-project/llvm EXCLUDE_FROM_ALL)
 
-set(LASERC_HOST_TRIPLE ${LLVM_HOST_TRIPLE})
+add_subdirectory(target)
+
+set(LASERC_HOST_TRIPLE ${LCCC_DETECTED_HOST_TARGET})
 
 set(LASERC_TARGET_TRIPLES ${LASERC_HOST_TRIPLE} CACHE STRING "The list of laser targets to compile the standard library for")
 
