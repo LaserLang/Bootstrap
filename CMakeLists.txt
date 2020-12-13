@@ -9,7 +9,9 @@ option(LLVM_ENABLE_BINDINGS "By default, llvm bindings are not built with laserc
 
 add_subdirectory(llvm-project/llvm EXCLUDE_FROM_ALL)
 
+if(NOT DEFINED LCCC_DETECTED_HOST_TARGET)
 add_subdirectory(target)
+endif()
 
 set(LASERC_HOST_TRIPLE ${LCCC_DETECTED_HOST_TARGET})
 

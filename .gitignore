@@ -1,3 +1,9 @@
 build*/
 cmake-build-*/
 .ccache/
+.cache/
+
+# IDE Files
+.vscode/
+.idea/
+.eclipse
