@@ -90,7 +90,7 @@ std::vector<token>* laserc::lex(std::istream &file) {
             token t{tmp_cur_line, tmp_cur_col, tok_str};
             result->push_back(t);
         }
-        else if ( // <c><c>, <c>=, <c>
+        else if ( // <c><c>, <c>=, <c>, ->
             curc == '&' ||
             curc == '|' ||
             curc == '+' ||
@@ -103,7 +103,7 @@ std::vector<token>* laserc::lex(std::istream &file) {
             cur_line = line;
             cur_col = col;
             curc = nextc(line, col, file);
-            if (curc == '=' || curc == firstc) {
+            if (curc == '=' || curc == firstc || (firstc == '-' && curc == '>')) {
                 tok_str.push_back(curc);
                 cur_line = line;
                 cur_col = col;
