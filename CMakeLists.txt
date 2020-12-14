@@ -46,6 +46,31 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+include(CheckCXXCompilerFlag)
+
+if(NOT DEFINED LASERC_HAS_WERROR)
+    check_cxx_compiler_flag("-Werror" LASERC_HAS_WERROR)
+endif()
+
+if(LASERC_HAS_WERROR)
+    add_compile_options("-Werror")
+endif()
+
+if(NOT DEFINED LASERC_HAS_PEDANTIC_ERRORS)
+    check_cxx_compiler_flag("-pedantic-errors" LASERC_HAS_PEDANTIC_ERRORS)
+endif()
+
+if(LASERC_HAS_PEDANTIC_ERRORS)
+    add_compile_options("-pedantic-errors")
+endif()
+
+if(NOT DEFINED LASERC_HAS_WALL)
+    check_cxx_compiler_flag("-Wall" LASERC_HAS_WALL)
+endif()
+
+if(LASERC_HAS_WALL)
+    add_compile_options("-Wall")
+endif()
 add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.cpp src/token.hpp src/ast.cpp src/ast.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)

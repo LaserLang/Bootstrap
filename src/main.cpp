@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <llvm/ADT/Triple.h>
 #include <string_view>
 #include <vector>
@@ -20,9 +22,15 @@ int main(int argc, char *argv[]) {
     auto output_type{laserc::link_type::Exec};
     std::string_view default_linker{LASERC_DEFAULT_LINKER};
     llvm::Triple target{LASERC_DEFAULT_TRIPLE};
-    for (auto it = begin(opts); it != end(opts); it++) { // ADL too OP
+    for (auto it = std::next(begin(opts)); it != end(opts);
+         it++) { // ADL too OP
     }
 
+    static_cast<void>(output);
+    static_cast<void>(input_files);
+    static_cast<void>(output_type);
+    static_cast<void>(mode);
+    static_cast<void>(default_linker);
     // FIXME: TEMPORARY CODE UNTIL OPTION PARSING IS DONE
     std::ifstream file(argv[1], std::ios::in);
     if (!file.is_open())
