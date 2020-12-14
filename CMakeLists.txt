@@ -46,7 +46,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.cpp src/token.hpp
+add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.cpp src/token.hpp src/ast.cpp src/ast.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)
 
