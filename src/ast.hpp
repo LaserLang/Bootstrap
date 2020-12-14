@@ -16,6 +16,8 @@ class ast_node {
   public:
     [[nodiscard]] uint64_t get_line() const noexcept;
     [[nodiscard]] uint32_t get_column() const noexcept;
+    [[nodiscard]] virtual const std::string &get_node_name() const noexcept = 0;
+    virtual ~ast_node();
 };
 
 class identifier_node : public ast_node {
