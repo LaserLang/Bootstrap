@@ -1,6 +1,7 @@
 #ifndef LASERC_AST_HPP
 #define LASERC_AST_HPP
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -8,7 +9,13 @@
 
 namespace laserc {
 
-class ast_node { // Don't know if we need any common properties or not
+class ast_node {
+  private:
+    uint64_t line;
+    uint32_t column;
+  public:
+    [[nodiscard]] uint64_t get_line() const noexcept;
+    [[nodiscard]] uint32_t get_column() const noexcept;
 };
 
 class identifier_node : public ast_node {
