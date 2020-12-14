@@ -14,6 +14,7 @@ class ast_node {
   private:
     uint64_t line;
     uint32_t column;
+
   public:
     [[nodiscard]] uint64_t get_line() const noexcept;
     [[nodiscard]] uint32_t get_column() const noexcept;
@@ -21,13 +22,13 @@ class ast_node {
     virtual ~ast_node() = 0;
 };
 
-template<typename T> class value_node : public ast_node {
+template <typename T> class value_node : public ast_node {
   public:
     [[nodiscard]] virtual const T &get_value() const noexcept = 0;
     virtual ~value_node() = 0;
 };
 
-template<typename T> value_node<T>::~value_node() {}
+template <typename T> value_node<T>::~value_node() {}
 
 class identifier_node : public value_node<std::string> {
   private:
@@ -116,7 +117,8 @@ class block_expression_node : public ast_node {
         std::vector<std::unique_ptr<statement_node>> statements,
         std::unique_ptr<expression_without_block_node> ret_val) noexcept;
     [[nodiscard]] std::string_view get_node_name() const noexcept override;
-    [[nodiscard]] const std::vector<std::unique_ptr<statement_node>> &get_statements() const noexcept;
+    [[nodiscard]] const std::vector<std::unique_ptr<statement_node>> &
+    get_statements() const noexcept;
     [[nodiscard]] expression_without_block_node *get_ret_val() const noexcept;
 };
 
