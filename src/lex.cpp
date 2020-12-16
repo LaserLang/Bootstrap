@@ -19,8 +19,8 @@ static char nextc(uint64_t &line, uint32_t &col, std::istream &file) {
     return next;
 }
 
-std::vector<token> *laserc::lex(std::istream &file) {
-    auto result = new std::vector<token>();
+std::vector<token> laserc::lex(std::istream &file) {
+    auto result = std::vector<token>();
     uint64_t line = 1; // Why no 0 index? AAAA
     uint32_t col = 1;  // AAAA AAAA
 
@@ -34,7 +34,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
             curc == '"') {
             std::string data(1, curc);
             token t{cur_line, cur_col, data};
-            result->push_back(t);
+            result.push_back(t);
             cur_line = line;
             cur_col = col;
             curc = nextc(line, col, file);
@@ -54,7 +54,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
                 curc = nextc(line, col, file);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else if (curc == '/') { // /=, //, /
             std::string tok_str(1, curc);
             uint64_t tmp_cur_line = cur_line;
@@ -76,9 +76,10 @@ std::vector<token> *laserc::lex(std::istream &file) {
                     cur_col = col;
                     curc = nextc(line, col, file);
                 }
+                continue; // We don't need to store that there was a comment; that's not helpful.
             } // I have not decided how to tokenize multilines yet
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else if ( // <c><c>, <c>=, <c>, ->
             curc == '&' || curc == '|' || curc == '+' || curc == '-') {
             char firstc = curc;
@@ -96,7 +97,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
                 curc = nextc(line, col, file);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else if (curc == ' ' || curc == '\t' ||
                    curc == '\r' || // If the C++ stl does it's job, this
                                    // shouldn't be a problem.
@@ -125,7 +126,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
                 curc = nextc(line, col, file);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else if (curc >= '0' && curc <= '9') {
             std::string tok_str(1, curc);
             uint64_t tmp_cur_line = cur_line;
@@ -140,7 +141,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
                 curc = nextc(line, col, file);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else if ((curc >= 'a' && curc <= 'z') ||
                    (curc >= 'A' && curc <= 'Z') || (curc == '_') ||
                    (curc == '$')) {
@@ -160,7 +161,7 @@ std::vector<token> *laserc::lex(std::istream &file) {
                 curc = nextc(line, col, file);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str};
-            result->push_back(t);
+            result.push_back(t);
         } else {
             std::cerr << "FATAL: Invalid character '" << curc << "'!";
             throw "Invalid character"; // FIXME: Don't use exceptions

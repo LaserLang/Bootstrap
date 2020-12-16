@@ -9,8 +9,11 @@
 
 #include <Config.hpp>
 
+#include "ast.hpp"
 #include "lex.hpp"
 #include "mode.hpp"
+#include "parser.hpp"
+#include "token.hpp"
 
 using namespace laserc;
 
@@ -35,16 +38,19 @@ int main(int argc, char *argv[]) {
     std::ifstream file(argv[1], std::ios::in);
     if (!file.is_open())
         return 1;
-    std::vector<token> *tokens = lex(file);
+    std::vector<token> tokens = lex(file);
     file.close();
 
     std::cout << "Tokens: {" << std::endl;
-    for (token t : *tokens) {
+    for (token t : tokens) {
         std::cout << "\t{" << t.get_line() << " " << t.get_column() << " "
                   << std::quoted(t.get_text()) << "}" << std::endl;
     }
     std::cout << "}" << std::endl;
 
-    delete tokens;
+    file_node parsed = parse_file(tokens);
+
+    std::cout << "AST: " << parsed << std::endl;
+
     return 0;
 }

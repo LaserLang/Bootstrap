@@ -71,7 +71,7 @@ endif()
 if(LASERC_HAS_WALL)
     add_compile_options("-Wall")
 endif()
-add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.cpp src/token.hpp src/ast.cpp src/ast.hpp
+add_executable(laserc-bootstrap src/main.cpp src/lex.cpp src/lex.hpp src/token.cpp src/token.hpp src/ast.cpp src/ast.hpp src/parser.cpp src/parser.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)
 

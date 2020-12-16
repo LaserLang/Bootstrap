@@ -2,6 +2,7 @@
 #define LASERC_AST_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -15,20 +16,39 @@ class ast_node {
     uint64_t line;
     uint32_t column;
 
+  protected:
+    virtual std::ostream &do_print(std::ostream &os) const noexcept;
+
   public:
     [[nodiscard]] uint64_t get_line() const noexcept;
     [[nodiscard]] uint32_t get_column() const noexcept;
     [[nodiscard]] virtual std::string_view get_node_name() const noexcept = 0;
+    friend std::ostream &operator<<(std::ostream &os, const ast_node &node) {
+      return node.do_print(os);
+    }
     virtual ~ast_node() = 0;
 };
 
 template <typename T> class value_node : public ast_node {
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
+
   public:
     [[nodiscard]] virtual const T &get_value() const noexcept = 0;
     virtual ~value_node() = 0;
 };
 
+template <typename T> std::ostream &value_node<T>::do_print(std::ostream &os) const noexcept {
+  os << get_node_name() << " (" << get_value() << ")";
+  return os;
+}
+
 template <typename T> value_node<T>::~value_node() {}
+
+class pattern_node : public ast_node { // Base interface
+  public:
+    virtual ~pattern_node() = 0;
+};
 
 class identifier_node : public value_node<std::string> {
   private:
@@ -40,19 +60,21 @@ class identifier_node : public value_node<std::string> {
     [[nodiscard]] const std::string &get_value() const noexcept override;
 };
 
-class pattern_node : public ast_node {
+class identifier_pattern_node : public pattern_node {
   private:
-    std::unique_ptr<identifier_node> name;
+    identifier_node pattern;
 
   public:
-    pattern_node(std::unique_ptr<identifier_node> name) noexcept;
+    identifier_pattern_node(std::string value) noexcept;
     [[nodiscard]] std::string_view get_node_name() const noexcept override;
-    [[nodiscard]] const identifier_node &get_name() const noexcept;
 };
 
 class type_node : public ast_node {
   private:
     std::unique_ptr<identifier_node> name;
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
 
   public:
     type_node(std::unique_ptr<identifier_node> name) noexcept;
@@ -73,38 +95,19 @@ class parameter_node : public ast_node {
     [[nodiscard]] const type_node &get_type() const noexcept;
 };
 
-class block_expression_node;
-
 class statement_node : public ast_node { // Base interface
   public:
     virtual ~statement_node() = 0;
 };
 
-class item_node : public statement_node { // Base interface
-  public:
-    virtual ~item_node() = 0;
-};
-
-class fn_node : public item_node {
-  private:
-    std::unique_ptr<identifier_node> name;
-    std::vector<std::unique_ptr<parameter_node>> parameters;
-    std::unique_ptr<block_expression_node> code;
-
-  public:
-    fn_node(std::unique_ptr<identifier_node> name,
-            std::vector<std::unique_ptr<parameter_node>> parameters,
-            std::unique_ptr<block_expression_node> code) noexcept;
-    [[nodiscard]] std::string_view get_node_name() const noexcept override;
-    [[nodiscard]] const identifier_node &get_name() const noexcept;
-    [[nodiscard]] const std::vector<std::unique_ptr<parameter_node>> &
-    get_parameters() const noexcept;
-    [[nodiscard]] const block_expression_node &get_code() const noexcept;
-};
-
 class expression_without_block_node : public statement_node { // Base interface
   public:
     virtual ~expression_without_block_node() = 0;
+};
+
+class item_node : public statement_node { // Base interface
+  public:
+    virtual ~item_node() = 0;
 };
 
 class block_expression_node : public ast_node {
@@ -120,6 +123,42 @@ class block_expression_node : public ast_node {
     [[nodiscard]] const std::vector<std::unique_ptr<statement_node>> &
     get_statements() const noexcept;
     [[nodiscard]] expression_without_block_node *get_ret_val() const noexcept;
+};
+
+class fn_node : public item_node {
+  private:
+    std::unique_ptr<identifier_node> name;
+    std::vector<std::unique_ptr<parameter_node>> parameters;
+    std::unique_ptr<type_node> return_type; // NULLABLE
+    std::unique_ptr<block_expression_node> code;
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
+
+  public:
+    fn_node(std::unique_ptr<identifier_node> name,
+            std::vector<std::unique_ptr<parameter_node>> parameters,
+            std::unique_ptr<type_node> return_type,
+            std::unique_ptr<block_expression_node> code) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const identifier_node &get_name() const noexcept;
+    [[nodiscard]] const std::vector<std::unique_ptr<parameter_node>> &
+    get_parameters() const noexcept;
+    [[nodiscard]] const type_node *get_return_type() const noexcept;
+    [[nodiscard]] const block_expression_node &get_code() const noexcept;
+};
+
+class file_node : public ast_node {
+  private:
+    std::vector<std::unique_ptr<item_node>> items;
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
+
+  public:
+    file_node(std::vector<std::unique_ptr<item_node>> items) noexcept;
+    [[nodiscard]] const std::vector<std::unique_ptr<item_node>> &get_items() const noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
 };
 
 } // namespace laserc
