@@ -6,6 +6,14 @@
 
 namespace laserc {
 
+std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
+  // I hate expression parsing
+  // So, we basically just need to churn until we see ";", ",", or "}".
+  std::unique_ptr<expression_node> result;
+
+  return result;
+}
+
 identifier_node parse_identifier(std::vector<token>::iterator &token_it) {
   identifier_node result((*token_it).get_text());
   token_it++;
@@ -26,7 +34,13 @@ block_expression_node parse_block_expression(std::vector<token>::iterator &token
     std::exit(1);
   }
   while((*(token_it++)).get_text() != "}") {
-    // TODO: parse statements
+    // TODO: parse non-expression statements
+    std::unique_ptr<expression_node> expr = parse_expression(token_it);
+    if((*token_it).get_text() != "}") {
+      statements.push_back(std::move(expr));
+    } else {
+      ret_val = std::move(expr);
+    }
   }
 
   block_expression_node result(std::move(statements), std::move(ret_val));

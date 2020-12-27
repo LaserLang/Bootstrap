@@ -100,7 +100,12 @@ class statement_node : public ast_node { // Base interface
     virtual ~statement_node() = 0;
 };
 
-class expression_without_block_node : public statement_node { // Base interface
+class expression_node : public statement_node { // Base interface
+  public:
+    virtual ~expression_node() = 0;
+};
+
+class expression_without_block_node : public expression_node { // Base interface
   public:
     virtual ~expression_without_block_node() = 0;
 };

@@ -33,7 +33,7 @@ std::vector<token> laserc::lex(std::istream &file) {
             curc == ';' || curc == ',' || curc == '.' || curc == '\'' ||
             curc == '"') {
             std::string data(1, curc);
-            token t{cur_line, cur_col, data};
+            token t{cur_line, cur_col, data, SYMBOL};
             result.push_back(t);
             cur_line = line;
             cur_col = col;
@@ -53,7 +53,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
         } else if (curc == '/') { // /=, //, /
             std::string tok_str(1, curc);
@@ -78,7 +78,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 }
                 continue; // We don't need to store that there was a comment; that's not helpful.
             } // I have not decided how to tokenize multilines yet
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
         } else if ( // <c><c>, <c>=, <c>, ->
             curc == '&' || curc == '|' || curc == '+' || curc == '-') {
@@ -96,7 +96,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
         } else if (curc == ' ' || curc == '\t' ||
                    curc == '\r' || // If the C++ stl does it's job, this
@@ -125,7 +125,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
         } else if (curc >= '0' && curc <= '9') {
             std::string tok_str(1, curc);
@@ -140,7 +140,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, NUMBER};
             result.push_back(t);
         } else if ((curc >= 'a' && curc <= 'z') ||
                    (curc >= 'A' && curc <= 'Z') || (curc == '_') ||
@@ -160,7 +160,7 @@ std::vector<token> laserc::lex(std::istream &file) {
                 cur_col = col;
                 curc = nextc(line, col, file);
             }
-            token t{tmp_cur_line, tmp_cur_col, tok_str};
+            token t{tmp_cur_line, tmp_cur_col, tok_str, IDENTIFIER};
             result.push_back(t);
         } else {
             std::cerr << "FATAL: Invalid character '" << curc << "'!";
