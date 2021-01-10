@@ -9,8 +9,51 @@ namespace laserc {
 std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
   // I hate expression parsing
   // So, we basically just need to churn until we see ";", ",", or "}".
-  std::unique_ptr<expression_node> result;
 
+  bool expecting_val = true; // Right now, my goal is to make sure it's valid.
+  uint8_t decimal_parsing_state = 0; // 0 = No decimal point, 1 = "x.", 2 = ""
+
+  token cur_token = *token_it;
+
+  while(cur_token.get_text() != ";" && cur_token.get_text() != "," && cur_token.get_text() != "}") {
+    switch(cur_token.get_type()) {
+    case NUMBER:
+      if(!expecting_val) {
+        std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected symbol, got number" << std::endl;
+        std::exit(1);
+      }
+      if(decimal_parsing_state == 1) decimal_parsing_state = 2;
+      expecting_val = false;
+      break;
+    case SYMBOL:
+      if(expecting_val) {
+        std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected number or identifier, got symbol" << std::endl;
+        std::exit(1);
+      }
+      if(cur_token.get_text() == "-" || cur_token.get_text() == "/") {
+        expecting_val = true;
+        decimal_parsing_state = 0;
+        break;
+      } else if(cur_token.get_text() == ".") {
+        if(decimal_parsing_state == 0) decimal_parsing_state = 1;
+        else {
+          std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: single number has two decimal points" << std::endl;
+          std::exit(1);
+        }
+        expecting_val = true;
+        break;
+      } else {
+        std::cerr << "Incomplete expression parser: Symbol \"" << cur_token.get_text() << "\" was allowed through" << std::endl;
+        std::exit(1);
+      }
+    default:
+      std::cerr << "Incomplete expression parser: Token \"" << cur_token.get_text() << "\" was allowed through" << std::endl;
+      std::exit(1);
+    }
+    cur_token = *(++token_it);
+  }
+
+  std::unique_ptr<expression_node> result(std::move(nullptr));
   return result;
 }
 
@@ -27,7 +70,6 @@ type_node parse_type(std::vector<token>::iterator &token_it) {
 
 block_expression_node parse_block_expression(std::vector<token>::iterator &token_it) {
   std::vector<std::unique_ptr<statement_node>> statements;
-  std::unique_ptr<expression_without_block_node> ret_val;
 
   if((*token_it).get_text() != "{") {
     std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected \"{\", got \"" << (*token_it).get_text() << "\"" << std::endl;
@@ -35,15 +77,10 @@ block_expression_node parse_block_expression(std::vector<token>::iterator &token
   }
   while((*(token_it++)).get_text() != "}") {
     // TODO: parse non-expression statements
-    std::unique_ptr<expression_node> expr = parse_expression(token_it);
-    if((*token_it).get_text() != "}") {
-      statements.push_back(std::move(expr));
-    } else {
-      ret_val = std::move(expr);
-    }
+    statements.push_back(parse_expression(token_it));
   }
 
-  block_expression_node result(std::move(statements), std::move(ret_val));
+  block_expression_node result(std::move(statements));
   return result;
 }
 

@@ -118,16 +118,13 @@ class item_node : public statement_node { // Base interface
 class block_expression_node : public ast_node {
   private:
     std::vector<std::unique_ptr<statement_node>> statements;
-    std::unique_ptr<expression_without_block_node> ret_val; // NULLABLE
 
   public:
     block_expression_node(
-        std::vector<std::unique_ptr<statement_node>> statements,
-        std::unique_ptr<expression_without_block_node> ret_val) noexcept;
+        std::vector<std::unique_ptr<statement_node>> statements) noexcept;
     [[nodiscard]] std::string_view get_node_name() const noexcept override;
     [[nodiscard]] const std::vector<std::unique_ptr<statement_node>> &
     get_statements() const noexcept;
-    [[nodiscard]] expression_without_block_node *get_ret_val() const noexcept;
 };
 
 class fn_node : public item_node {

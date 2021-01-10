@@ -96,9 +96,8 @@ std::ostream &fn_node::do_print(std::ostream &os) const noexcept {
 }
 
 block_expression_node::block_expression_node(
-    std::vector<std::unique_ptr<statement_node>> statements,
-    std::unique_ptr<expression_without_block_node> ret_val) noexcept
-    : statements(std::move(statements)), ret_val(std::move(ret_val)) {}
+    std::vector<std::unique_ptr<statement_node>> statements) noexcept
+    : statements(std::move(statements)) {}
 [[nodiscard]] std::string_view
 block_expression_node::get_node_name() const noexcept {
     return "Block expression"sv;
