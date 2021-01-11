@@ -40,7 +40,7 @@ message(STATUS "Compiling for ${LASERC_DEFAULT_TARGET_TRIPLE} by default")
 
 configure_file(Config.hpp.in Config.hpp)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

@@ -95,12 +95,63 @@ std::ostream &fn_node::do_print(std::ostream &os) const noexcept {
   return os;
 }
 
+expression_node::~expression_node() {}
+
 block_expression_node::block_expression_node(
     std::vector<std::unique_ptr<statement_node>> statements) noexcept
     : statements(std::move(statements)) {}
 [[nodiscard]] std::string_view
 block_expression_node::get_node_name() const noexcept {
     return "Block expression"sv;
+}
+
+const std::vector<std::unique_ptr<statement_node>> &block_expression_node::get_statements() const noexcept {
+    return statements;
+}
+
+std::ostream &block_expression_node::do_print(std::ostream &os) const noexcept {
+  os << get_node_name() << " {" << std::endl;
+  os << "Statements: [" << std::endl;
+  for(const auto &statements : get_statements()) {
+    os << *statements << std::endl;
+  }
+  os << "]" << std::endl;
+  os << "}";
+  return os;
+}
+
+integer_expression_node::integer_expression_node(
+    int value) noexcept
+    : value(value) {}
+[[nodiscard]] std::string_view
+integer_expression_node::get_node_name() const noexcept {
+    return "Integer"sv;
+}
+
+const int &integer_expression_node::get_value() const noexcept {
+    return value;
+}
+
+double_expression_node::double_expression_node(
+    double value) noexcept
+    : value(value) {}
+[[nodiscard]] std::string_view
+double_expression_node::get_node_name() const noexcept {
+    return "Double"sv;
+}
+
+const double &double_expression_node::get_value() const noexcept {
+    return value;
+}
+
+binary_expression_node::binary_expression_node(
+    std::unique_ptr<expression_node> lhs,
+    binary_operator op,
+    std::unique_ptr<expression_node> rhs) noexcept
+    : lhs(std::move(lhs)), op(op), rhs(std::move(rhs)) {}
+[[nodiscard]] std::string_view
+binary_expression_node::get_node_name() const noexcept {
+    return "Binary expression"sv;
 }
 
 file_node::file_node(std::vector<std::unique_ptr<item_node>> items) noexcept

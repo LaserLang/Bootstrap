@@ -115,9 +115,12 @@ class item_node : public statement_node { // Base interface
     virtual ~item_node() = 0;
 };
 
-class block_expression_node : public ast_node {
+class block_expression_node : public expression_node {
   private:
     std::vector<std::unique_ptr<statement_node>> statements;
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
 
   public:
     block_expression_node(
@@ -125,6 +128,52 @@ class block_expression_node : public ast_node {
     [[nodiscard]] std::string_view get_node_name() const noexcept override;
     [[nodiscard]] const std::vector<std::unique_ptr<statement_node>> &
     get_statements() const noexcept;
+};
+
+enum binary_operator {
+  ADD,
+  DIVIDE
+};
+
+class binary_expression_node : public expression_node {
+  private:
+    std::unique_ptr<expression_node> lhs;
+    binary_operator op;
+    std::unique_ptr<expression_node> rhs;
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
+
+  public:
+    binary_expression_node(std::unique_ptr<expression_node> lhs,
+        binary_operator op,
+        std::unique_ptr<expression_node> rhs) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const std::vector<std::unique_ptr<expression_node>> &
+    get_lhs() const noexcept;
+    [[nodiscard]] const binary_operator &get_op() const noexcept;
+    [[nodiscard]] const std::vector<std::unique_ptr<expression_node>> &
+    get_rhs() const noexcept;
+};
+
+class integer_expression_node : public expression_node, public value_node<int> {
+  private:
+    int value; // I'll fix this later
+
+  public:
+    integer_expression_node(int value) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const int &get_value() const noexcept override;
+};
+
+class double_expression_node : public expression_node, public value_node<double> {
+  private:
+    double value; // I'll fix this later
+
+  public:
+    double_expression_node(double value) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const double &get_value() const noexcept override;
 };
 
 class fn_node : public item_node {

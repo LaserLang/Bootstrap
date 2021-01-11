@@ -1,60 +1,106 @@
 #include "parser.hpp"
 
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string_view>
 
+using namespace std::string_view_literals;
+
 namespace laserc {
 
-std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
-  // I hate expression parsing
-  // So, we basically just need to churn until we see ";", ",", or "}".
-
-  bool expecting_val = true; // Right now, my goal is to make sure it's valid.
-  uint8_t decimal_parsing_state = 0; // 0 = No decimal point, 1 = "x.", 2 = ""
-
-  token cur_token = *token_it;
-
-  while(cur_token.get_text() != ";" && cur_token.get_text() != "," && cur_token.get_text() != "}") {
-    switch(cur_token.get_type()) {
-    case NUMBER:
-      if(!expecting_val) {
-        std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected symbol, got number" << std::endl;
-        std::exit(1);
-      }
-      if(decimal_parsing_state == 1) decimal_parsing_state = 2;
-      expecting_val = false;
-      break;
-    case SYMBOL:
-      if(expecting_val) {
-        std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected number or identifier, got symbol" << std::endl;
-        std::exit(1);
-      }
-      if(cur_token.get_text() == "-" || cur_token.get_text() == "/") {
-        expecting_val = true;
-        decimal_parsing_state = 0;
-        break;
-      } else if(cur_token.get_text() == ".") {
-        if(decimal_parsing_state == 0) decimal_parsing_state = 1;
-        else {
-          std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: single number has two decimal points" << std::endl;
-          std::exit(1);
-        }
-        expecting_val = true;
-        break;
-      } else {
-        std::cerr << "Incomplete expression parser: Symbol \"" << cur_token.get_text() << "\" was allowed through" << std::endl;
-        std::exit(1);
-      }
-    default:
-      std::cerr << "Incomplete expression parser: Token \"" << cur_token.get_text() << "\" was allowed through" << std::endl;
-      std::exit(1);
+std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::iterator &token_it) {
+  token cur_token = *(token_it++);
+  switch(cur_token.get_type()) {
+  case NUMBER:
+  {
+    int value = 0;
+    for(char c : cur_token.get_text()) {
+      value *= 10;
+      value += (c - '0');
     }
-    cur_token = *(++token_it);
+    cur_token = *token_it;
+    if(cur_token.get_text() == ".") {
+      token_it++;
+      token cur_token = *(token_it++);
+      switch(cur_token.get_type()) {
+      case NUMBER:
+      {
+        double value2 = 0;
+        for(char c : cur_token.get_text()) {
+          value2 += (c - '0');
+          value2 /= 10;
+        }
+        cur_token = *token_it;
+        if(cur_token.get_text() == ".") {
+          token_it++;
+        }
+        return std::make_unique<double_expression_node>(double_expression_node(value+value2));
+      }
+      case IDENTIFIER:
+        std::cerr << "Calling functions on numbers is unimplemented!" << std::endl;
+        std::exit(1);
+      default:
+        std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected number or identifier, got \"" << cur_token.get_text() << "\"" << std::endl;
+        std::exit(1);
+      }
+    } else {
+      return std::make_unique<integer_expression_node>(integer_expression_node(value));
+    }
+  }
+  case IDENTIFIER:
+    std::cerr << "Variables in expressions are unimplemented!" << std::endl;
+    std::exit(1);
+  default:
+    std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected number or identifier, got \"" << cur_token.get_text() << "\"" << std::endl;
+    std::exit(1);
+  }
+}
+
+std::map<std::string_view, std::pair<uint8_t, binary_operator>> operators {
+  {"+"sv, {1, ADD}}
+};
+
+std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_node> lhs, uint8_t min_precedence, std::vector<token>::iterator &token_it) {
+  // I hate expression parsing
+  // So, we basically just need to churn until we see ";", ",", ")", or "}".
+
+  std::unique_ptr<expression_node> result(std::move(lhs));
+
+  token lookaheadt = *token_it;
+  if(!operators.contains(lookaheadt.get_text())) {
+    if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
+      return result;
+    std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+    std::exit(1);
+  }
+  std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
+
+  while(lookahead.first >= min_precedence) {
+    std::pair<int, binary_operator> op = lookahead;
+    token_it++;
+    std::unique_ptr<expression_node> rhs = parse_primary_expression(token_it);
+    while(1) {
+      lookaheadt = *token_it;
+      if(!operators.contains(lookaheadt.get_text())) {
+        if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
+          break;
+        std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+        std::exit(1);
+      }
+      lookahead = operators[lookaheadt.get_text()];
+      if(lookahead.first <= op.first) break;
+      token_it++;
+      rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
+    }
+    result = std::make_unique<binary_expression_node>(binary_expression_node(std::move(result), op.second, std::move(rhs)));
   }
 
-  std::unique_ptr<expression_node> result(std::move(nullptr));
   return result;
+}
+
+std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
+  return parse_expression0(parse_primary_expression(token_it), 0, token_it);
 }
 
 identifier_node parse_identifier(std::vector<token>::iterator &token_it) {
