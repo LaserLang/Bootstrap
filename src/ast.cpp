@@ -164,8 +164,8 @@ std::map<binary_operator, std::string_view> ops_strings = {
 
 std::ostream &binary_expression_node::do_print(std::ostream &os) const noexcept {
   os << get_node_name() << " {" << std::endl;
-  os << "LHS: " << get_lhs() << std::endl;
-  os << "Operator: \"" << ops_strings[get_op()] << "\"" << std::endl;
+  os << "LHS: " << get_lhs() << "," << std::endl;
+  os << "Operator: \"" << ops_strings[get_op()] << "\"," << std::endl;
   os << "RHS: " << get_rhs() << std::endl;
   os << "}";
   return os;

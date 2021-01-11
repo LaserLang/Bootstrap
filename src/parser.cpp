@@ -59,7 +59,7 @@ std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::it
 
 std::map<std::string_view, std::pair<uint8_t, binary_operator>> operators {
   {"+"sv, {1, ADD}},
-  {"-"sv, {1, ADD}},
+  {"-"sv, {1, SUB}},
   {"*"sv, {2, MUL}},
   {"/"sv, {2, DIV}}
 };
@@ -71,15 +71,15 @@ std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_no
   std::unique_ptr<expression_node> result(std::move(lhs));
 
   token lookaheadt = *token_it;
-  if(!operators.contains(lookaheadt.get_text())) {
-    if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
-      return result;
-    std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-    std::exit(1);
-  }
-  std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
-
-  while(lookahead.first >= min_precedence) {
+  while(1) {
+    if(!operators.contains(lookaheadt.get_text())) {
+      if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
+        return result;
+      std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+      std::exit(1);
+    }
+    std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
+    if(lookahead.first < min_precedence) return result;
     std::pair<int, binary_operator> op = lookahead;
     token_it++;
     std::unique_ptr<expression_node> rhs = parse_primary_expression(token_it);
@@ -98,8 +98,6 @@ std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_no
     }
     result = std::make_unique<binary_expression_node>(binary_expression_node(std::move(result), op.second, std::move(rhs)));
   }
-
-  return result;
 }
 
 std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
