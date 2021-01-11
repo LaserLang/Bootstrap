@@ -133,6 +133,11 @@ const int &integer_expression_node::get_value() const noexcept {
     return value;
 }
 
+std::ostream &integer_expression_node::do_print(std::ostream &os) const noexcept {
+  os << get_node_name() << " (" << get_value() << ")";
+  return os;
+}
+
 double_expression_node::double_expression_node(
     double value) noexcept
     : value(value) {}
@@ -143,6 +148,11 @@ double_expression_node::get_node_name() const noexcept {
 
 const double &double_expression_node::get_value() const noexcept {
     return value;
+}
+
+std::ostream &double_expression_node::do_print(std::ostream &os) const noexcept {
+  os << get_node_name() << " (" << get_value() << ")";
+  return os;
 }
 
 binary_expression_node::binary_expression_node(

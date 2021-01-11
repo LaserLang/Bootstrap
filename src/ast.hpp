@@ -156,9 +156,12 @@ class binary_expression_node : public expression_node {
     [[nodiscard]] const expression_node &get_rhs() const noexcept;
 };
 
-class integer_expression_node : public expression_node, public value_node<int> {
+class integer_expression_node : public value_node<int>, public expression_node {
   private:
     int value; // I'll fix this later
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
 
   public:
     integer_expression_node(int value) noexcept;
@@ -169,6 +172,9 @@ class integer_expression_node : public expression_node, public value_node<int> {
 class double_expression_node : public expression_node, public value_node<double> {
   private:
     double value; // I'll fix this later
+
+  protected:
+    std::ostream &do_print(std::ostream &os) const noexcept override;
 
   public:
     double_expression_node(double value) noexcept;
