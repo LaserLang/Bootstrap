@@ -58,7 +58,10 @@ std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::it
 }
 
 std::map<std::string_view, std::pair<uint8_t, binary_operator>> operators {
-  {"+"sv, {1, ADD}}
+  {"+"sv, {1, ADD}},
+  {"-"sv, {1, ADD}},
+  {"*"sv, {2, MUL}},
+  {"/"sv, {2, DIV}}
 };
 
 std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_node> lhs, uint8_t min_precedence, std::vector<token>::iterator &token_it) {

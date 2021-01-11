@@ -1,6 +1,7 @@
 #include "ast.hpp"
 
 #include <iostream>
+#include <map>
 
 using namespace laserc;
 using namespace std::string_view_literals;
@@ -152,6 +153,34 @@ binary_expression_node::binary_expression_node(
 [[nodiscard]] std::string_view
 binary_expression_node::get_node_name() const noexcept {
     return "Binary expression"sv;
+}
+
+std::map<binary_operator, std::string_view> ops_strings = {
+    {ADD, "+"sv},
+    {SUB, "-"sv},
+    {MUL, "*"sv},
+    {DIV, "/"sv},
+};
+
+std::ostream &binary_expression_node::do_print(std::ostream &os) const noexcept {
+  os << get_node_name() << " {" << std::endl;
+  os << "LHS: " << get_lhs() << std::endl;
+  os << "Operator: \"" << ops_strings[get_op()] << "\"" << std::endl;
+  os << "RHS: " << get_rhs() << std::endl;
+  os << "}";
+  return os;
+}
+
+const expression_node &binary_expression_node::get_lhs() const noexcept {
+    return *lhs;
+}
+
+const binary_operator &binary_expression_node::get_op() const noexcept {
+    return op;
+}
+
+const expression_node &binary_expression_node::get_rhs() const noexcept {
+    return *rhs;
 }
 
 file_node::file_node(std::vector<std::unique_ptr<item_node>> items) noexcept

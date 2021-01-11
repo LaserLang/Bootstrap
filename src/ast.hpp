@@ -132,7 +132,9 @@ class block_expression_node : public expression_node {
 
 enum binary_operator {
   ADD,
-  DIVIDE
+  SUB,
+  MUL,
+  DIV
 };
 
 class binary_expression_node : public expression_node {
@@ -149,11 +151,9 @@ class binary_expression_node : public expression_node {
         binary_operator op,
         std::unique_ptr<expression_node> rhs) noexcept;
     [[nodiscard]] std::string_view get_node_name() const noexcept override;
-    [[nodiscard]] const std::vector<std::unique_ptr<expression_node>> &
-    get_lhs() const noexcept;
+    [[nodiscard]] const expression_node &get_lhs() const noexcept;
     [[nodiscard]] const binary_operator &get_op() const noexcept;
-    [[nodiscard]] const std::vector<std::unique_ptr<expression_node>> &
-    get_rhs() const noexcept;
+    [[nodiscard]] const expression_node &get_rhs() const noexcept;
 };
 
 class integer_expression_node : public expression_node, public value_node<int> {
