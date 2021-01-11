@@ -93,7 +93,6 @@ std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_no
       }
       lookahead = operators[lookaheadt.get_text()];
       if(lookahead.first <= op.first) break;
-      token_it++;
       rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
     }
     result = std::make_unique<binary_expression_node>(binary_expression_node(std::move(result), op.second, std::move(rhs)));
