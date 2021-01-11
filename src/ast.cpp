@@ -10,7 +10,7 @@ ast_node::~ast_node() {}
 [[nodiscard]] uint64_t ast_node::get_line() const noexcept { return line; }
 [[nodiscard]] uint32_t ast_node::get_column() const noexcept { return column; }
 
-std::ostream &ast_node::do_print(std::ostream &os) const noexcept {
+std::ostream &ast_node::do_print(std::ostream &os, std::string indent) const noexcept {
   os << get_node_name();
   return os;
 }
@@ -34,10 +34,10 @@ const identifier_node &type_node::get_name() const noexcept {
     return *name;
 }
 
-std::ostream &type_node::do_print(std::ostream &os) const noexcept {
-  os << get_node_name() << " {" << std::endl;
-  os << "Name: " << get_name() << std::endl;
-  os << "}";
+std::ostream &type_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "Name: ";
+  get_name().do_print(os, indent + "  ");
   return os;
 }
 
@@ -78,21 +78,26 @@ const block_expression_node &fn_node::get_code() const noexcept {
     return *code;
 }
 
-std::ostream &fn_node::do_print(std::ostream &os) const noexcept {
-  os << get_node_name() << " {" << std::endl;
-  os << "Name: " << get_name() << std::endl;
-  os << "Parameters: [" << std::endl;
+std::ostream &fn_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "Name: ";
+  get_name().do_print(os, indent + "  ");
+  os << std::endl;
+  os << indent << "Parameters:" << std::endl;
   for(const auto &parameter : get_parameters()) {
-    os << *parameter << std::endl;
+    os << indent << "  ";
+    parameter->do_print(os, indent + "    ");
+    os << std::endl;
   }
-  os << "]" << std::endl;
   auto return_type = get_return_type();
-  if(return_type)
-    os << "Return type: " << *return_type << std::endl;
-  else
-    os << "Return type: <null>" << std::endl;
-  os << "Code: " << get_code() << std::endl;
-  os << "}";
+  if(return_type) {
+    os << indent << "Return type: ";
+    return_type->do_print(os, indent + "  ");
+    os << std::endl;
+  } else
+    os << indent << "Return type: <null>" << std::endl;
+  os << indent << "Code: ";
+  get_code().do_print(os, indent + "  ");
   return os;
 }
 
@@ -110,14 +115,15 @@ const std::vector<std::unique_ptr<statement_node>> &block_expression_node::get_s
     return statements;
 }
 
-std::ostream &block_expression_node::do_print(std::ostream &os) const noexcept {
-  os << get_node_name() << " {" << std::endl;
-  os << "Statements: [" << std::endl;
-  for(const auto &statements : get_statements()) {
-    os << *statements << std::endl;
+std::ostream &block_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "Statements:" << std::endl;
+  std::string separator = "";
+  for(const auto &statement : get_statements()) {
+    os << separator << indent << "  ";
+    statement->do_print(os, indent + "    ");
+    separator = "\n";
   }
-  os << "]" << std::endl;
-  os << "}";
   return os;
 }
 
@@ -133,7 +139,7 @@ const int &integer_expression_node::get_value() const noexcept {
     return value;
 }
 
-std::ostream &integer_expression_node::do_print(std::ostream &os) const noexcept {
+std::ostream &integer_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
   os << get_node_name() << " (" << get_value() << ")";
   return os;
 }
@@ -150,7 +156,7 @@ const double &double_expression_node::get_value() const noexcept {
     return value;
 }
 
-std::ostream &double_expression_node::do_print(std::ostream &os) const noexcept {
+std::ostream &double_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
   os << get_node_name() << " (" << get_value() << ")";
   return os;
 }
@@ -172,12 +178,14 @@ std::map<binary_operator, std::string_view> ops_strings = {
     {DIV, "/"sv},
 };
 
-std::ostream &binary_expression_node::do_print(std::ostream &os) const noexcept {
-  os << get_node_name() << " {" << std::endl;
-  os << "LHS: " << get_lhs() << "," << std::endl;
-  os << "Operator: \"" << ops_strings[get_op()] << "\"," << std::endl;
-  os << "RHS: " << get_rhs() << std::endl;
-  os << "}";
+std::ostream &binary_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "LHS: ";
+  get_lhs().do_print(os, indent + "  ");
+  os << std::endl;
+  os << indent << "Operator: \"" << ops_strings[get_op()] << "\"" << std::endl;
+  os << indent << "RHS: ";
+  get_rhs().do_print(os, indent + "  ");
   return os;
 }
 
@@ -203,13 +211,14 @@ const std::vector<std::unique_ptr<item_node>> &file_node::get_items() const noex
     return items;
 }
 
-std::ostream &file_node::do_print(std::ostream &os) const noexcept {
-  os << get_node_name() << " {" << std::endl;
-  os << "Items: [" << std::endl;
+std::ostream &file_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "Items:" << std::endl;
+  std::string separator = "";
   for(const auto &item : get_items()) {
-    os << *item << std::endl;
+    os << separator << indent << "  ";
+    item->do_print(os, indent + "    ");
+    separator = "\n";
   }
-  os << "]" << std::endl;
-  os << "}";
   return os;
 }
