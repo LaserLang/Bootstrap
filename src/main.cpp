@@ -13,18 +13,19 @@
 #include "lex.hpp"
 #include "mode.hpp"
 #include "parser.hpp"
+#include "semantic.hpp"
 #include "token.hpp"
 
-using namespace laserc;
+using namespace cannon;
 
 int main(int argc, char *argv[]) {
     std::vector<std::string_view> opts(argv, argv + argc);
     std::string_view output{};
     std::vector<std::string_view> input_files{};
-    auto mode{laserc::compiler_mode::CompileAndLink};
-    auto output_type{laserc::link_type::Exec};
-    std::string_view default_linker{LASERC_DEFAULT_LINKER};
-    llvm::Triple target{LASERC_DEFAULT_TRIPLE};
+    auto mode{cannon::compiler_mode::CompileAndLink};
+    auto output_type{cannon::link_type::Exec};
+    std::string_view default_linker{CANNON_DEFAULT_LINKER};
+    llvm::Triple target{CANNON_DEFAULT_TRIPLE};
     for (auto it = std::next(begin(opts)); it != end(opts);
          it++) { // ADL too OP
     }
@@ -51,6 +52,10 @@ int main(int argc, char *argv[]) {
     file_node parsed = parse_file(tokens);
 
     std::cout << "AST: " << parsed << std::endl;
+
+    program analysed = analyze(std::move(parsed));
+
+    std::cout << analysed;
 
     return 0;
 }

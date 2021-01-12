@@ -2,10 +2,10 @@
 // Created by chorm on 2020-08-05.
 //
 
-#ifndef LASERC_MODE_HPP
-#define LASERC_MODE_HPP
+#ifndef CANNON_MODE_HPP
+#define CANNON_MODE_HPP
 
-namespace laserc {
+namespace cannon {
 
 enum class compiler_mode {
     CompileAndLink,  // Produce final binary, according to LinkType
@@ -16,20 +16,20 @@ enum class compiler_mode {
                   // artifacts
     Dependencies, // Produces a dependency graph for the compilation, but does
                   // not
-    ModuleServer, // Act as a module server, and marshall compilation of laserc
-                  // dependency graphs, by a combination of laserc runs using
+    ModuleServer, // Act as a module server, and marshall compilation of cannon
+                  // dependency graphs, by a combination of cannon runs using
                   // -c/--compile-only, and --check.
 };
 
 enum class link_type {
     Exec,
-    JoinedModule, // .lslib
-    SharedModule, // .so/.dll, with a lslib section
-    StaticLib,    // .a/.lib, usable with C/not-laser
-    SharedLib, // .so/.dll, usable with C/not-laser, no laser module information
-    Partial,   // .lslib or .lsm, but incomplete
+    JoinedModule, // .tbd
+    SharedModule, // .so/.dll, with a tbd section
+    StaticLib,    // .a/.lib, usable with C/not-cannon
+    SharedLib, // .so/.dll, usable with C/not-cannon, no cannon module information
+    Partial,   // .tbd or .tbd2, but incomplete
 };
 
-} // namespace laserc
+} // namespace cannon
 
-#endif // LASERC_MODE_HPP
+#endif // CANNON_MODE_HPP

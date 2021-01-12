@@ -3,7 +3,7 @@
 #include <iostream>
 #include <map>
 
-using namespace laserc;
+using namespace cannon;
 using namespace std::string_view_literals;
 
 ast_node::~ast_node() {}

@@ -1,11 +1,11 @@
-#ifndef LASERC_TOKEN_HPP
-#define LASERC_TOKEN_HPP
+#ifndef CANNON_TOKEN_HPP
+#define CANNON_TOKEN_HPP
 
 #include <cstdint>
 
 #include <string>
 
-namespace laserc {
+namespace cannon {
 
 enum token_type {
   SYMBOL,
@@ -29,6 +29,6 @@ class token {
     [[nodiscard]] token_type get_type() const noexcept;
 };
 
-} // namespace laserc
+} // namespace cannon
 
-#endif // LASERC_TOKEN_HPP
+#endif // CANNON_TOKEN_HPP

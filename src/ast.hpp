@@ -1,5 +1,5 @@
-#ifndef LASERC_AST_HPP
-#define LASERC_AST_HPP
+#ifndef CANNON_AST_HPP
+#define CANNON_AST_HPP
 
 #include <cstdint>
 #include <iostream>
@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-namespace laserc {
+namespace cannon {
 
 class ast_node {
   private:
@@ -200,6 +200,6 @@ class file_node : public ast_node {
     std::ostream &do_print(std::ostream &os, std::string indent) const noexcept override;
 };
 
-} // namespace laserc
+} // namespace cannon
 
-#endif // LASERC_TOKEN_HPP
+#endif // CANNON_TOKEN_HPP

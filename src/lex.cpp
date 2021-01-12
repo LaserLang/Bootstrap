@@ -3,7 +3,7 @@
 
 #include "lex.hpp"
 
-using namespace laserc;
+namespace cannon {
 
 static char nextc(uint64_t &line, uint32_t &col, std::istream &file) {
     char next;
@@ -19,7 +19,7 @@ static char nextc(uint64_t &line, uint32_t &col, std::istream &file) {
     return next;
 }
 
-std::vector<token> laserc::lex(std::istream &file) {
+std::vector<token> lex(std::istream &file) {
     auto result = std::vector<token>();
     uint64_t line = 1; // Why no 0 index? AAAA
     uint32_t col = 1;  // AAAA AAAA
@@ -170,3 +170,5 @@ std::vector<token> laserc::lex(std::istream &file) {
 
     return result;
 }
+
+} // namespace cannon

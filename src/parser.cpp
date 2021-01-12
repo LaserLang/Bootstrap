@@ -7,7 +7,7 @@
 
 using namespace std::string_view_literals;
 
-namespace laserc {
+namespace cannon {
 
 std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::iterator &token_it) {
   token cur_token = *(token_it++);
