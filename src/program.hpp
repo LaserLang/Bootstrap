@@ -14,15 +14,18 @@ enum class type_id {
 };
 
 class type {
+  private:
+    type_id m_id;
   public:
-    type(std::string_view name); // No namespaces for now
+    type(type_id id);
 };
 
 class function {
   private:
-    type m_return_type;
+    const type m_return_type;
+    const std::string_view m_name;
   public:
-    function(type return_type);
+    function(type return_type, std::string_view name);
 };
 
 class program {
