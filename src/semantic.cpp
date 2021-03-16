@@ -3,8 +3,8 @@
 namespace cannon {
 
 program analyze(file_node file) {
-    program result;
-    return result;
+    incomplete_program result;
+    return result.to_program();
 }
 
 } // namespace cannon
