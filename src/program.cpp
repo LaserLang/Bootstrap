@@ -4,6 +4,10 @@
 
 namespace cannon {
 
+incomplete_expression::~incomplete_expression() {}
+
+incomplete_statement::~incomplete_statement() {}
+
 void incomplete_type::set_name(std::string_view name) {
     m_name = name;
 }
@@ -24,12 +28,32 @@ void incomplete_function::set_return_type(const incomplete_type &return_type) {
     m_return_type = &return_type;
 }
 
+void incomplete_function::set_ast(const fn_node &ast) {
+    m_ast = &ast;
+}
+
+void incomplete_function::add_statement(incomplete_statement &statement) {
+    m_statements.push_back(&statement);
+}
+
+const fn_node& incomplete_function::ast() const {
+    return *m_ast;
+}
+
+const std::vector<incomplete_statement*>& incomplete_function::statements() const {
+    return m_statements;
+}
+
 function incomplete_function::to_function() const {
     return function(m_return_type->to_type(), m_name);
 }
 
-void incomplete_program::add_function(const incomplete_function &function) {
+void incomplete_program::add_function(incomplete_function &function) {
     m_functions.push_back(&function);
+}
+
+const std::vector<incomplete_function*>& incomplete_program::functions() const {
+    return m_functions;
 }
 
 program incomplete_program::to_program() const {
