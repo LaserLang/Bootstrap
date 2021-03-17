@@ -8,6 +8,10 @@ void incomplete_type::set_name(std::string_view name) {
     m_name = name;
 }
 
+void incomplete_type::set_id(type_id id) {
+    m_id = id;
+}
+
 type incomplete_type::to_type() const {
     return type(m_id);
 }
@@ -39,7 +43,23 @@ program incomplete_program::to_program() const {
 type::type(type_id id): m_id(id) {}
 
 std::ostream& operator<<(std::ostream &os, const type &type) {
+    switch(type.id()) {
+      case type_id::Void:
+        os << "()";
+        break;
+      case type_id::I32:
+        os << "i32";
+        break;
+      case type_id::None:
+      default:
+        os << "Unknown/unresolved type";
+        break;
+    }
     return os;
+}
+
+type_id type::id() const {
+    return m_id;
 }
 
 function::function(type return_type, std::string_view name): m_return_type(return_type), m_name(name) {}
@@ -47,7 +67,7 @@ function::function(type return_type, std::string_view name): m_return_type(retur
 std::ostream& operator<<(std::ostream &os, const function &function) {
     os << "    Function" << std::endl;
     os << "      Name: " << function.name() << std::endl;
-    os << "      Return type: " << function.return_type() << std::endl;
+    os << "      Return type: " << function.return_type();
     return os;
 }
 
