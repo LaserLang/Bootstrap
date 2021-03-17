@@ -1,5 +1,7 @@
 #include "program.hpp"
 
+#include <ostream>
+
 namespace cannon {
 
 void incomplete_type::set_name(std::string_view name) {
