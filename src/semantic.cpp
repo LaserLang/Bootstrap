@@ -9,6 +9,9 @@ program analyze(file_node file) {
         fn_node *func = dynamic_cast<fn_node*>(&(**item));
         incomplete_function result_fn;
         result_fn.set_name(func->get_name().get_value());
+        incomplete_type t;
+        t.set_name(func->get_return_type()->get_name().get_value());
+        result_fn.set_return_type(t);
         result.add_function(result_fn);
     }
     return result.to_program();

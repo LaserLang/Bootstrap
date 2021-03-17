@@ -2,12 +2,20 @@
 
 namespace cannon {
 
+void incomplete_type::set_name(std::string_view name) {
+    m_name = name;
+}
+
 type incomplete_type::to_type() const {
     return type(m_id);
 }
 
 void incomplete_function::set_name(std::string_view name) {
     m_name = name;
+}
+
+void incomplete_function::set_return_type(const incomplete_type &return_type) {
+    m_return_type = &return_type;
 }
 
 function incomplete_function::to_function() const {
