@@ -15,9 +15,10 @@ enum class type_id {
 
 class type {
   private:
-    type_id m_id;
+    const type_id m_id;
   public:
     type(type_id id);
+    type_id id() const;
 };
 
 class function {
@@ -26,16 +27,18 @@ class function {
     const std::string_view m_name;
   public:
     function(type return_type, std::string_view name);
+    friend std::ostream &operator<<(std::ostream &os, const function &function);
+    type return_type() const;
+    std::string_view name() const;
 };
 
 class program {
   private:
-    std::vector<std::unique_ptr<function>> m_functions;
+    const std::vector<std::unique_ptr<function>> m_functions;
   public:
     program(std::vector<std::unique_ptr<function>> functions);
-    friend std::ostream &operator<<(std::ostream &os, const program &program) {
-      return os;
-    }
+    friend std::ostream &operator<<(std::ostream &os, const program &program);
+    const std::vector<std::unique_ptr<function>>& functions() const;
 };
 
 class incomplete_type {

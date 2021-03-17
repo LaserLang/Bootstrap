@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 
     program analysed = analyze(std::move(parsed));
 
-    std::cout << analysed;
+    std::cout << analysed << std::endl;
 
     return 0;
 }
