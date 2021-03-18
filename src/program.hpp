@@ -100,27 +100,27 @@ class incomplete_function {
   private:
     const incomplete_type *m_return_type;
     std::string_view m_name;
-    std::vector<incomplete_statement*> m_statements;
+    std::vector<std::unique_ptr<incomplete_statement>> m_statements;
     const fn_node *m_ast;
   public:
     function to_function() const;
     void set_return_type(const incomplete_type &return_type);
     void set_name(const std::string_view name);
     void set_ast(const fn_node &ast);
-    void add_statement(incomplete_statement &statement);
+    void add_statement(std::unique_ptr<incomplete_statement> statement);
     const incomplete_type* return_type() const;
     const std::string_view name() const;
     const fn_node& ast() const;
-    const std::vector<incomplete_statement*>& statements() const;
+    const std::vector<std::unique_ptr<incomplete_statement>>& statements() const;
 };
 
 class incomplete_program {
   private:
-    std::vector<incomplete_function*> m_functions;
+    std::vector<std::unique_ptr<incomplete_function>> m_functions;
   public:
     program to_program() const;
-    void add_function(incomplete_function &function);
-    const std::vector<incomplete_function*>& functions() const;
+    void add_function(std::unique_ptr<incomplete_function> function);
+    const std::vector<std::unique_ptr<incomplete_function>>& functions() const;
 };
 
 }

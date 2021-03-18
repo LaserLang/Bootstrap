@@ -32,15 +32,15 @@ void incomplete_function::set_ast(const fn_node &ast) {
     m_ast = &ast;
 }
 
-void incomplete_function::add_statement(incomplete_statement &statement) {
-    m_statements.push_back(&statement);
+void incomplete_function::add_statement(std::unique_ptr<incomplete_statement> statement) {
+    m_statements.push_back(std::move(statement));
 }
 
 const fn_node& incomplete_function::ast() const {
     return *m_ast;
 }
 
-const std::vector<incomplete_statement*>& incomplete_function::statements() const {
+const std::vector<std::unique_ptr<incomplete_statement>>& incomplete_function::statements() const {
     return m_statements;
 }
 
@@ -48,18 +48,18 @@ function incomplete_function::to_function() const {
     return function(m_return_type->to_type(), m_name);
 }
 
-void incomplete_program::add_function(incomplete_function &function) {
-    m_functions.push_back(&function);
+void incomplete_program::add_function(std::unique_ptr<incomplete_function> function) {
+    m_functions.push_back(std::move(function));
 }
 
-const std::vector<incomplete_function*>& incomplete_program::functions() const {
+const std::vector<std::unique_ptr<incomplete_function>>& incomplete_program::functions() const {
     return m_functions;
 }
 
 program incomplete_program::to_program() const {
     std::vector<std::unique_ptr<function>> functions;
-    for(const incomplete_function *incomp_fn : m_functions) {
-        functions.push_back(std::make_unique<function>(incomp_fn->to_function()));
+    for(auto &f : m_functions) {
+        functions.push_back(std::make_unique<function>(f->to_function()));
     }
     return program(std::move(functions));
 }
@@ -107,9 +107,8 @@ program::program(std::vector<std::unique_ptr<function>> functions): m_functions(
 
 std::ostream& operator<<(std::ostream &os, const program &program) {
     os << "Program" << std::endl << "  Functions:";
-    const std::vector<std::unique_ptr<function>> &functions = program.functions();
-    for(auto func = functions.begin(); func < functions.end(); func++) {
-        os << std::endl << **func;
+    for(const auto &func : program.functions()) {
+        os << std::endl << *func;
     }
     return os;
 }
