@@ -4,6 +4,38 @@
 
 namespace cannon {
 
+void incomplete_integer_expression::set_value(int value) {
+    m_value = value;
+}
+
+integer_expression incomplete_integer_expression::to_integer_expression() const {
+    return integer_expression(m_value);
+}
+
+std::unique_ptr<expression> incomplete_integer_expression::to_expression_ptr() const {
+    return std::make_unique<integer_expression>(to_integer_expression());
+}
+
+void incomplete_binary_expression::set_lhs(std::unique_ptr<incomplete_expression> lhs) {
+    m_lhs = std::move(lhs);
+}
+
+void incomplete_binary_expression::set_op(binary_operator op) {
+    m_op = op;
+}
+
+void incomplete_binary_expression::set_rhs(std::unique_ptr<incomplete_expression> rhs) {
+    m_rhs = std::move(rhs);
+}
+
+binary_expression incomplete_binary_expression::to_binary_expression() const {
+    return binary_expression(m_lhs->to_expression_ptr(), m_op, m_rhs->to_expression_ptr(), m_return_type.to_type());
+}
+
+std::unique_ptr<expression> incomplete_binary_expression::to_expression_ptr() const {
+    return std::make_unique<binary_expression>(to_binary_expression());
+}
+
 incomplete_expression::~incomplete_expression() {}
 
 incomplete_statement::~incomplete_statement() {}
@@ -44,8 +76,12 @@ const std::vector<std::unique_ptr<incomplete_statement>>& incomplete_function::s
     return m_statements;
 }
 
-function incomplete_function::to_function() const {
-    return function(m_return_type->to_type(), m_name);
+std::unique_ptr<function> incomplete_function::to_function_ptr() const {
+    std::vector<std::unique_ptr<statement>> statements;
+    for(auto &s : m_statements) {
+        statements.push_back(s->to_statement_ptr());
+    }
+    return std::make_unique<function>(m_return_type->to_type(), m_name, std::move(statements));
 }
 
 void incomplete_program::add_function(std::unique_ptr<incomplete_function> function) {
@@ -59,7 +95,7 @@ const std::vector<std::unique_ptr<incomplete_function>>& incomplete_program::fun
 program incomplete_program::to_program() const {
     std::vector<std::unique_ptr<function>> functions;
     for(auto &f : m_functions) {
-        functions.push_back(std::make_unique<function>(f->to_function()));
+        functions.push_back(f->to_function_ptr());
     }
     return program(std::move(functions));
 }
@@ -86,7 +122,8 @@ type_id type::id() const {
     return m_id;
 }
 
-function::function(type return_type, std::string_view name): m_return_type(return_type), m_name(name) {}
+function::function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements):
+    m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
 std::ostream& operator<<(std::ostream &os, const function &function) {
     os << "    Function" << std::endl;

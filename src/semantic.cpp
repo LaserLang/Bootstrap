@@ -1,13 +1,28 @@
 #include "semantic.hpp"
 
+#include <cstdlib>
 #include <iostream>
 #include <unordered_map>
 
 namespace cannon {
 
 std::unique_ptr<incomplete_expression> convert_and_tag_expr(const expression_node &expr) {
-    incomplete_binary_expression result;
-    return std::make_unique<incomplete_binary_expression>(result);
+    const binary_expression_node *bin_expr = dynamic_cast<const binary_expression_node*>(&expr);
+    if(bin_expr) {
+        incomplete_binary_expression result;
+        result.set_lhs(convert_and_tag_expr(bin_expr->get_lhs()));
+        result.set_op(bin_expr->get_op());
+        result.set_rhs(convert_and_tag_expr(bin_expr->get_rhs()));
+        // Type coercion comes later
+        return std::make_unique<incomplete_binary_expression>(std::move(result));
+    }
+    const integer_expression_node *int_expr = dynamic_cast<const integer_expression_node*>(&expr);
+    if(int_expr) {
+        incomplete_integer_expression result;
+        result.set_value(int_expr->get_value());
+        return std::make_unique<incomplete_integer_expression>(result);
+    }
+    std::abort();
 }
 
 program analyze(file_node file) {

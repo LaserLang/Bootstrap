@@ -36,24 +36,33 @@ class expression : public statement {
 
 class binary_expression : public expression {
   private:
-    const expression &m_lhs;
+    const std::unique_ptr<expression> m_lhs;
     const binary_operator m_op;
-    const expression &m_rhs;
+    const std::unique_ptr<expression> m_rhs;
     const type m_return_type;
   public:
-    binary_expression(const expression &lhs, binary_operator op, const expression &rhs, type return_type);
+    binary_expression(const std::unique_ptr<expression> lhs, binary_operator op, const std::unique_ptr<expression> rhs, type return_type);
     type return_type() const;
+};
+
+class integer_expression : public expression {
+  private:
+    const int value;
+  public:
+    integer_expression(int value);
 };
 
 class function {
   private:
     const type m_return_type;
     const std::string_view m_name;
+    const std::vector<std::unique_ptr<statement>> m_statements;
   public:
-    function(type return_type, std::string_view name);
+    function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements);
     friend std::ostream &operator<<(std::ostream &os, const function &function);
     type return_type() const;
     std::string_view name() const;
+    const std::vector<std::unique_ptr<statement>>& statements() const;
 };
 
 class program {
@@ -80,20 +89,37 @@ class incomplete_type {
 class incomplete_statement {
   public:
     virtual ~incomplete_statement() = 0;
+    virtual std::unique_ptr<statement> to_statement_ptr() const = 0;
 };
 
 class incomplete_expression : public incomplete_statement {
   public:
     virtual ~incomplete_expression() = 0;
+    std::unique_ptr<statement> to_statement_ptr() const;
+    virtual std::unique_ptr<expression> to_expression_ptr() const = 0;
+};
+
+class incomplete_integer_expression : public incomplete_expression {
+  private:
+    int m_value;
+  public:
+    std::unique_ptr<expression> to_expression_ptr() const;
+    integer_expression to_integer_expression() const;
+    void set_value(int value);
 };
 
 class incomplete_binary_expression : public incomplete_expression {
   private:
-    incomplete_expression *lhs;
-    binary_operator op;
-    incomplete_expression *rhs;
+    std::unique_ptr<incomplete_expression> m_lhs;
+    binary_operator m_op;
+    std::unique_ptr<incomplete_expression> m_rhs;
+    incomplete_type m_return_type;
   public:
+    std::unique_ptr<expression> to_expression_ptr() const;
     binary_expression to_binary_expression() const;
+    void set_lhs(std::unique_ptr<incomplete_expression> lhs);
+    void set_op(binary_operator op);
+    void set_rhs(std::unique_ptr<incomplete_expression> rhs);
 };
 
 class incomplete_function {
@@ -103,7 +129,7 @@ class incomplete_function {
     std::vector<std::unique_ptr<incomplete_statement>> m_statements;
     const fn_node *m_ast;
   public:
-    function to_function() const;
+    std::unique_ptr<function> to_function_ptr() const;
     void set_return_type(const incomplete_type &return_type);
     void set_name(const std::string_view name);
     void set_ast(const fn_node &ast);
