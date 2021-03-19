@@ -10,12 +10,50 @@ expression::~expression() {}
 
 integer_expression::integer_expression(int value): m_value(value) {}
 
+void integer_expression::do_print(std::ostream &os, std::string leftpad) {
+    os << "Integer (" << m_value << ")";
+}
+
 type integer_expression::return_type() const {
     return type(type_id::I32);
 }
 
 binary_expression::binary_expression(std::unique_ptr<expression> lhs, binary_operator op, std::unique_ptr<expression> rhs, type return_type):
     m_lhs(std::move(lhs)), m_op(op), m_rhs(std::move(rhs)), m_return_type(return_type) {}
+
+void binary_expression::do_print(std::ostream &os, std::string leftpad) {
+    os << "Binary expression" << std::endl << leftpad;
+
+    os << "LHS: ";
+    m_lhs->do_print(os, leftpad + "  ");
+    os << std::endl << leftpad;
+
+    os << "Operator: ";
+    switch(m_op) {
+      case ADD:
+        os << "+";
+        break;
+      case SUB:
+        os << "-";
+        break;
+      case MUL:
+        os << "*";
+        break;
+      case DIV:
+        os << "/";
+        break;
+      default:
+        os << "Unknown :sus:";
+        break;
+    }
+    os << std::endl << leftpad;
+
+    os << "RHS: ";
+    m_rhs->do_print(os, leftpad + "  ");
+    os << std::endl << leftpad;
+
+    os << "Result type: " << m_return_type;
+}
 
 type binary_expression::return_type() const {
     return m_return_type;
@@ -146,10 +184,19 @@ type_id type::id() const {
 function::function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements):
     m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
+const std::vector<std::unique_ptr<statement>>& function::statements() const {
+    return m_statements;
+}
+
 std::ostream& operator<<(std::ostream &os, const function &function) {
     os << "    Function" << std::endl;
     os << "      Name: " << function.name() << std::endl;
-    os << "      Return type: " << function.return_type();
+    os << "      Return type: " << function.return_type() << std::endl;
+    os << "      Statements:";
+    for(const auto &statement : function.statements()) {
+        os << std::endl << "        ";
+        statement->do_print(os, "          ");
+    }
     return os;
 }
 

@@ -20,6 +20,7 @@ class type {
     type_id m_id;
   public:
     type(type_id id);
+    friend std::ostream &operator<<(std::ostream &os, const type &type);
     type_id id() const;
 };
 
@@ -27,6 +28,7 @@ class statement {
   public:
     virtual ~statement() = 0;
     virtual type return_type() const = 0;
+    virtual void do_print(std::ostream &os, std::string leftpad) = 0;
 };
 
 class expression : public statement {
@@ -44,6 +46,7 @@ class binary_expression : public expression {
     binary_expression(const std::unique_ptr<expression> lhs, binary_operator op, const std::unique_ptr<expression> rhs, type return_type);
     binary_operator op() const;
     type return_type() const;
+    void do_print(std::ostream &os, std::string leftpad);
 };
 
 class integer_expression : public expression {
@@ -53,6 +56,7 @@ class integer_expression : public expression {
     integer_expression(int value);
     int value() const;
     type return_type() const;
+    void do_print(std::ostream &os, std::string leftpad);
 };
 
 class function {
