@@ -79,6 +79,7 @@ add_executable(cannon-bootstrap
         src/parser.cpp src/parser.hpp
         src/semantic.cpp src/semantic.hpp
         src/program.cpp src/program.hpp
+        src/codegen.cpp src/codegen.hpp
 
         ${CMAKE_CURRENT_BINARY_DIR}/Config.hpp
         src/mode.hpp)

@@ -10,6 +10,7 @@
 #include <Config.hpp>
 
 #include "ast.hpp"
+#include "codegen.hpp"
 #include "lex.hpp"
 #include "mode.hpp"
 #include "parser.hpp"
@@ -56,6 +57,8 @@ int main(int argc, char *argv[]) {
     program analysed = analyze(std::move(parsed));
 
     std::cout << "Analysed: " << analysed << std::endl;
+
+    codegen(std::move(analysed));
 
     return 0;
 }
