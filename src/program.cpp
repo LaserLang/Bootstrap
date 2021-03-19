@@ -4,6 +4,23 @@
 
 namespace cannon {
 
+statement::~statement() {}
+
+expression::~expression() {}
+
+integer_expression::integer_expression(int value): m_value(value) {}
+
+type integer_expression::return_type() const {
+    return type(type_id::I32);
+}
+
+binary_expression::binary_expression(std::unique_ptr<expression> lhs, binary_operator op, std::unique_ptr<expression> rhs, type return_type):
+    m_lhs(std::move(lhs)), m_op(op), m_rhs(std::move(rhs)), m_return_type(return_type) {}
+
+type binary_expression::return_type() const {
+    return m_return_type;
+}
+
 void incomplete_integer_expression::set_value(int value) {
     m_value = value;
 }
@@ -14,6 +31,10 @@ integer_expression incomplete_integer_expression::to_integer_expression() const 
 
 std::unique_ptr<expression> incomplete_integer_expression::to_expression_ptr() const {
     return std::make_unique<integer_expression>(to_integer_expression());
+}
+
+std::unique_ptr<statement> incomplete_expression::to_statement_ptr() const {
+    return to_expression_ptr();
 }
 
 void incomplete_binary_expression::set_lhs(std::unique_ptr<incomplete_expression> lhs) {

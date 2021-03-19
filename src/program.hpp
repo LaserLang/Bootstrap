@@ -17,7 +17,7 @@ enum class type_id {
 
 class type {
   private:
-    const type_id m_id;
+    type_id m_id;
   public:
     type(type_id id);
     type_id id() const;
@@ -26,7 +26,7 @@ class type {
 class statement {
   public:
     virtual ~statement() = 0;
-    virtual type return_type() const;
+    virtual type return_type() const = 0;
 };
 
 class expression : public statement {
@@ -36,27 +36,30 @@ class expression : public statement {
 
 class binary_expression : public expression {
   private:
-    const std::unique_ptr<expression> m_lhs;
-    const binary_operator m_op;
-    const std::unique_ptr<expression> m_rhs;
-    const type m_return_type;
+    std::unique_ptr<expression> m_lhs;
+    binary_operator m_op;
+    std::unique_ptr<expression> m_rhs;
+    type m_return_type;
   public:
     binary_expression(const std::unique_ptr<expression> lhs, binary_operator op, const std::unique_ptr<expression> rhs, type return_type);
+    binary_operator op() const;
     type return_type() const;
 };
 
 class integer_expression : public expression {
   private:
-    const int value;
+    int m_value;
   public:
     integer_expression(int value);
+    int value() const;
+    type return_type() const;
 };
 
 class function {
   private:
-    const type m_return_type;
-    const std::string_view m_name;
-    const std::vector<std::unique_ptr<statement>> m_statements;
+    type m_return_type;
+    std::string_view m_name;
+    std::vector<std::unique_ptr<statement>> m_statements;
   public:
     function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements);
     friend std::ostream &operator<<(std::ostream &os, const function &function);
@@ -67,7 +70,7 @@ class function {
 
 class program {
   private:
-    const std::vector<std::unique_ptr<function>> m_functions;
+    std::vector<std::unique_ptr<function>> m_functions;
   public:
     program(std::vector<std::unique_ptr<function>> functions);
     friend std::ostream &operator<<(std::ostream &os, const program &program);
