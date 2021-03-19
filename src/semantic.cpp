@@ -13,7 +13,9 @@ std::unique_ptr<incomplete_expression> convert_and_tag_expr(const expression_nod
         result.set_lhs(convert_and_tag_expr(bin_expr->get_lhs()));
         result.set_op(bin_expr->get_op());
         result.set_rhs(convert_and_tag_expr(bin_expr->get_rhs()));
-        // Type coercion comes later
+        incomplete_type t;
+        t.set_id(type_id::I32);
+        result.set_return_type(t);
         return std::make_unique<incomplete_binary_expression>(std::move(result));
     }
     const integer_expression_node *int_expr = dynamic_cast<const integer_expression_node*>(&expr);

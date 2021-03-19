@@ -87,6 +87,10 @@ void incomplete_binary_expression::set_rhs(std::unique_ptr<incomplete_expression
     m_rhs = std::move(rhs);
 }
 
+void incomplete_binary_expression::set_return_type(incomplete_type return_type) {
+    m_return_type = return_type;
+}
+
 binary_expression incomplete_binary_expression::to_binary_expression() const {
     return binary_expression(m_lhs->to_expression_ptr(), m_op, m_rhs->to_expression_ptr(), m_return_type.to_type());
 }

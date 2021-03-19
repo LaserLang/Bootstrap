@@ -127,6 +127,7 @@ class incomplete_binary_expression : public incomplete_expression {
     void set_lhs(std::unique_ptr<incomplete_expression> lhs);
     void set_op(binary_operator op);
     void set_rhs(std::unique_ptr<incomplete_expression> rhs);
+    void set_return_type(incomplete_type return_type);
 };
 
 class incomplete_function {
