@@ -71,6 +71,7 @@ endif()
 if(CANNON_HAS_WALL)
     add_compile_options("-Wall")
 endif()
+
 add_executable(cannon-bootstrap
         src/main.cpp
         src/lex.cpp src/lex.hpp
@@ -87,5 +88,11 @@ add_executable(cannon-bootstrap
 target_include_directories(cannon-bootstrap PRIVATE llvm-project/llvm/include
         ${CMAKE_CURRENT_BINARY_DIR}/llvm-project/llvm/include)
 
-target_link_libraries(cannon-bootstrap LLVMCore LLVMTarget)
+set(LLVM_NATIVE_ARCH X86)
 
+llvm_map_components_to_libnames(llvm_libs codegen core native nativecodegen object support target)
+
+message(STATUS "LLVM libraries: ${llvm_libs}")
+message(STATUS "LLVM native target: ${LLVM_NATIVE_ARCH}")
+
+target_link_libraries(cannon-bootstrap ${llvm_libs})
