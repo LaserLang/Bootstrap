@@ -44,6 +44,8 @@ class binary_expression : public expression {
     type m_return_type;
   public:
     binary_expression(const std::unique_ptr<expression> lhs, binary_operator op, const std::unique_ptr<expression> rhs, type return_type);
+    const expression& lhs() const;
+    const expression& rhs() const;
     binary_operator op() const;
     type return_type() const;
     void do_print(std::ostream &os, std::string leftpad);

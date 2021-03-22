@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
@@ -15,8 +16,33 @@
 
 namespace cannon {
 
-llvm::Value* codegen_function_body(const std::vector<std::unique_ptr<statement>> &statements) {
-    return nullptr;
+llvm::Value* codegen_expr(const expression &expr, llvm::LLVMContext &context, llvm::IRBuilder<> &builder) {
+    if(const binary_expression *bin_expr = dynamic_cast<const binary_expression*>(&expr)) {
+        llvm::Value *lhs = codegen_expr(bin_expr->lhs(), context, builder);
+        llvm::Value *rhs = codegen_expr(bin_expr->rhs(), context, builder);
+        switch(bin_expr->op()) {
+          case ADD:
+            return builder.CreateAdd(lhs, rhs);
+          case SUB:
+            return builder.CreateSub(lhs, rhs);
+          case MUL:
+            return builder.CreateMul(lhs, rhs);
+          case DIV:
+            return builder.CreateUDiv(lhs, rhs);
+          default:
+            return nullptr;
+        }
+    } else if(const integer_expression *int_expr = dynamic_cast<const integer_expression*>(&expr)) {
+        return llvm::ConstantInt::get(context, llvm::APInt(32, int_expr->value() & 0x00000000FFFFFFFFULL, true));
+    } else {
+        std::cerr << "Heh. Heh." << std::endl;
+        return nullptr;
+    }
+}
+
+llvm::Value* codegen_function_body(const std::vector<std::unique_ptr<statement>> &statements, llvm::LLVMContext &context, llvm::IRBuilder<> &builder) {
+    // FIXME: So, for now, I'm assuming there's only one expr. Because there is only one expr.
+    return codegen_expr(*(dynamic_cast<expression*>(&(*statements[0]))), context, builder); // Uh, this statement is garbage
 }
 
 void codegen(program p) {
@@ -43,7 +69,7 @@ void codegen(program p) {
     module.setTargetTriple(targetTriple);
 
     std::error_code errorCode;
-    llvm::raw_fd_ostream dest("a.o", errorCode);
+    llvm::raw_fd_ostream dest("a.o", errorCode); // FIXME: Pass around output file name
     if(errorCode) {
         std::cerr << "Failed to open output file: " << errorCode.message() << std::endl;
         abort();
@@ -57,11 +83,11 @@ void codegen(program p) {
 
     llvm::IRBuilder<> builder(context);
     for(const std::unique_ptr<function> &f_p : p.functions()) {
-        // Assume all functions return i32 and take no parameters
+        // FIXME: Currently assuming all functions return i32 and take no parameters
         llvm::Function *function = llvm::Function::Create(llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false), llvm::Function::ExternalLinkage, std::string(f_p->name()), module); // LLVM naming conventions are garbage
         llvm::BasicBlock *block = llvm::BasicBlock::Create(context, "entry", function);
         builder.SetInsertPoint(block);
-        builder.CreateRet(codegen_function_body(f_p->statements()));
+        builder.CreateRet(codegen_function_body(f_p->statements(), context, builder));
         llvm::verifyFunction(*function);
     }
 

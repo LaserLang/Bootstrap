@@ -14,6 +14,10 @@ void integer_expression::do_print(std::ostream &os, std::string leftpad) {
     os << "Integer (" << m_value << ")";
 }
 
+int integer_expression::value() const {
+    return m_value;
+}
+
 type integer_expression::return_type() const {
     return type(type_id::I32);
 }
@@ -53,6 +57,18 @@ void binary_expression::do_print(std::ostream &os, std::string leftpad) {
     os << std::endl << leftpad;
 
     os << "Result type: " << m_return_type;
+}
+
+const expression& binary_expression::lhs() const {
+    return *m_lhs;
+}
+
+const expression& binary_expression::rhs() const {
+    return *m_rhs;
+}
+
+binary_operator binary_expression::op() const {
+    return m_op;
 }
 
 type binary_expression::return_type() const {
