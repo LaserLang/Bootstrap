@@ -45,7 +45,7 @@ llvm::Value* codegen_function_body(const std::vector<std::unique_ptr<statement>>
     return codegen_expr(*(dynamic_cast<expression*>(&(*statements[0]))), context, builder); // Uh, this statement is garbage
 }
 
-void codegen(program p) {
+void codegen(program p, std::string output_file) {
     llvm::LLVMContext context;
     llvm::Module module("Cannon Bootstrap Compiler", context);
 
@@ -69,7 +69,7 @@ void codegen(program p) {
     module.setTargetTriple(targetTriple);
 
     std::error_code errorCode;
-    llvm::raw_fd_ostream dest("a.o", errorCode); // FIXME: Pass around output file name
+    llvm::raw_fd_ostream dest(output_file, errorCode);
     if(errorCode) {
         std::cerr << "Failed to open output file: " << errorCode.message() << std::endl;
         abort();

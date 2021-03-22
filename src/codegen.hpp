@@ -5,7 +5,7 @@
 
 namespace cannon {
 
-void codegen(program p);
+void codegen(program p, std::string out_file);
 
 }
 
