@@ -30,6 +30,22 @@ enum class link_type {
     Partial,   // .tbd or .tbd2, but incomplete
 };
 
+enum class optimization_level {
+    
+    FirstReserved = 240,
+
+    // -Og
+    Debug = 250,
+    // -Ofast, not necessarily compliant
+    Fast = 252,
+    // -Os
+    Size = 253,
+    // -Oz
+    Zize = 254,
+    // -Oextra, not necessarily compliant
+    Extra = 255
+};
+
 } // namespace cannon
 
 #endif // CANNON_MODE_HPP
