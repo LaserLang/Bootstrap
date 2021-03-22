@@ -22,7 +22,7 @@ using namespace std::string_view_literals;
 
 int main(int argc, char *argv[]) {
     std::vector<std::string_view> opts(argv, argv + argc);
-    std::string_view output{};
+    std::string_view output{"a.o"};
     std::vector<std::string_view> input_files{};
     std::vector<std::string_view> libs{};
     std::vector<std::string_view> libdirs{};
@@ -112,7 +112,6 @@ int main(int argc, char *argv[]) {
             input_files.push_back(opt);
     }
 
-    static_cast<void>(output);
     static_cast<void>(input_files);
     static_cast<void>(output_type);
     static_cast<void>(mode);
@@ -139,7 +138,7 @@ int main(int argc, char *argv[]) {
 
         std::cout << "Analysed: " << analysed << std::endl;
         if(mode<compiler_mode::TypeCheck)
-            codegen(std::move(analysed));
+            codegen(std::move(analysed), std::string(output));
     }
 
     return 0;
