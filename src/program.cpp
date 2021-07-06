@@ -160,7 +160,7 @@ std::unique_ptr<function> incomplete_function::to_function_ptr() const {
     for(auto &s : m_statements) {
         statements.push_back(s->to_statement_ptr());
     }
-    return std::make_unique<function>(m_return_type->to_type(), m_name, std::move(statements));
+    return std::make_unique<function>(m_return_type->to_type(), std::string(m_name), std::move(statements));
 }
 
 void incomplete_program::add_function(std::unique_ptr<incomplete_function> function) {
@@ -201,7 +201,7 @@ type_id type::id() const {
     return m_id;
 }
 
-function::function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements):
+function::function(type return_type, std::string name, std::vector<std::unique_ptr<statement>> statements):
     m_return_type(return_type), m_name(name), m_statements(std::move(statements)) {}
 
 const std::vector<std::unique_ptr<statement>>& function::statements() const {
@@ -224,7 +224,7 @@ type function::return_type() const {
     return m_return_type;
 }
 
-std::string_view function::name() const {
+const std::string& function::name() const {
     return m_name;
 }
 

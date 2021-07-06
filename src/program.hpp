@@ -2,6 +2,7 @@
 #define CANNON_PROGRAM_HPP
 
 #include <memory>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -64,13 +65,13 @@ class integer_expression : public expression {
 class function {
   private:
     type m_return_type;
-    std::string_view m_name;
+    std::string m_name;
     std::vector<std::unique_ptr<statement>> m_statements;
   public:
-    function(type return_type, std::string_view name, std::vector<std::unique_ptr<statement>> statements);
+    function(type return_type, std::string name, std::vector<std::unique_ptr<statement>> statements);
     friend std::ostream &operator<<(std::ostream &os, const function &function);
     type return_type() const;
-    std::string_view name() const;
+    const std::string& name() const;
     const std::vector<std::unique_ptr<statement>>& statements() const;
 };
 

@@ -16,6 +16,14 @@
 
 namespace cannon {
 
+std::string mangle(const function &fn) {
+    std::string result = "_C";
+    result += std::to_string(fn.name().size());
+    result += fn.name();
+    result += "v"; // All functions have no parameters; don't ask too many questions.
+    return result;
+}
+
 llvm::Value* codegen_expr(const expression &expr, llvm::LLVMContext &context, llvm::IRBuilder<> &builder) {
     if(const binary_expression *bin_expr = dynamic_cast<const binary_expression*>(&expr)) {
         llvm::Value *lhs = codegen_expr(bin_expr->lhs(), context, builder);
@@ -83,8 +91,14 @@ void codegen(program p, std::string output_file) {
 
     llvm::IRBuilder<> builder(context);
     for(const std::unique_ptr<function> &f_p : p.functions()) {
-        // FIXME: Currently assuming all functions return i32 and take no parameters
-        llvm::Function *function = llvm::Function::Create(llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false), llvm::Function::ExternalLinkage, std::string(f_p->name()), module); // LLVM naming conventions are garbage
+        llvm::Function *function;
+        if(f_p->name() == "main") {
+            // All valid `main` functions have the same signature. All invalid `main` functions don't exist, NDR.
+            function = llvm::Function::Create(llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false), llvm::Function::ExternalLinkage, std::string("main"), module);
+        } else {
+            // FIXME: Currently assuming all functions return i32 and take no parameters.
+            function = llvm::Function::Create(llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false), llvm::Function::ExternalLinkage, mangle(*f_p), module); // LLVM naming conventions are garbage
+        }
         llvm::BasicBlock *block = llvm::BasicBlock::Create(context, "entry", function);
         builder.SetInsertPoint(block);
         builder.CreateRet(codegen_function_body(f_p->statements(), context, builder));
