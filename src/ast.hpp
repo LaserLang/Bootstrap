@@ -157,6 +157,17 @@ class integer_expression_node : public value_node<int>, public expression_node {
     std::ostream &do_print(std::ostream &os, std::string indent) const noexcept override;
 };
 
+class identifier_expression_node : public value_node<identifier_node>, public expression_node {
+  private:
+    std::unique_ptr<identifier_node> value; // I'll fix this later
+
+  public:
+    identifier_expression_node(std::unique_ptr<identifier_node> value) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const identifier_node &get_value() const noexcept override;
+    std::ostream &do_print(std::ostream &os, std::string indent) const noexcept override;
+};
+
 class double_expression_node : public expression_node, public value_node<double> {
   private:
     double value; // I'll fix this later

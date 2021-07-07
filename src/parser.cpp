@@ -35,7 +35,7 @@ std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::it
         if(cur_token.get_text() == ".") {
           token_it++;
         }
-        return std::make_unique<double_expression_node>(double_expression_node(value+value2));
+        return std::make_unique<double_expression_node>(value+value2);
       }
       case IDENTIFIER:
         std::cerr << "Calling functions on numbers is unimplemented!" << std::endl;
@@ -45,12 +45,11 @@ std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::it
         std::exit(1);
       }
     } else {
-      return std::make_unique<integer_expression_node>(integer_expression_node(value));
+      return std::make_unique<integer_expression_node>(value);
     }
   }
   case IDENTIFIER:
-    std::cerr << "Variables in expressions are unimplemented!" << std::endl;
-    std::exit(1);
+    return std::make_unique<identifier_expression_node>(std::make_unique<identifier_node>(cur_token.get_text()));
   default:
     std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected number or identifier, got \"" << cur_token.get_text() << "\"" << std::endl;
     std::exit(1);
@@ -95,7 +94,7 @@ std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_no
       if(lookahead.first <= op.first) break;
       rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
     }
-    result = std::make_unique<binary_expression_node>(binary_expression_node(std::move(result), op.second, std::move(rhs)));
+    result = std::make_unique<binary_expression_node>(std::move(result), op.second, std::move(rhs));
   }
 }
 

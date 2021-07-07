@@ -144,6 +144,23 @@ std::ostream &integer_expression_node::do_print(std::ostream &os, std::string in
   return os;
 }
 
+identifier_expression_node::identifier_expression_node(
+    std::unique_ptr<identifier_node> value) noexcept
+    : value(std::move(value)) {}
+[[nodiscard]] std::string_view
+identifier_expression_node::get_node_name() const noexcept {
+    return "Identifier (expression)"sv;
+}
+
+const identifier_node &identifier_expression_node::get_value() const noexcept {
+    return *value;
+}
+
+std::ostream &identifier_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << " (" << get_value().get_value() << ")";
+  return os;
+}
+
 double_expression_node::double_expression_node(
     double value) noexcept
     : value(value) {}
