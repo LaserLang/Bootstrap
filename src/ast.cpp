@@ -108,11 +108,11 @@ block_expression_node::block_expression_node(
     : statements(std::move(statements)) {}
 [[nodiscard]] std::string_view
 block_expression_node::get_node_name() const noexcept {
-    return "Block expression"sv;
+  return "Block expression"sv;
 }
 
 const std::vector<std::unique_ptr<statement_node>> &block_expression_node::get_statements() const noexcept {
-    return statements;
+  return statements;
 }
 
 std::ostream &block_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
@@ -122,6 +122,42 @@ std::ostream &block_expression_node::do_print(std::ostream &os, std::string inde
   for(const auto &statement : get_statements()) {
     os << separator << indent << "  ";
     statement->do_print(os, indent + "    ");
+    separator = "\n";
+  }
+  return os;
+}
+
+function_call_expression_node::function_call_expression_node(
+    std::unique_ptr<expression_node> func,
+    std::vector<std::unique_ptr<expression_node>> params) noexcept
+    : func(std::move(func)), params(std::move(params)) {}
+
+[[nodiscard]] std::string_view
+function_call_expression_node::get_node_name() const noexcept {
+  return "Function call expression"sv;
+}
+
+const expression_node &function_call_expression_node::get_func() const noexcept {
+  return *func;
+}
+
+const std::vector<std::unique_ptr<expression_node>> &function_call_expression_node::get_params() const noexcept {
+  return params;
+}
+
+std::ostream &function_call_expression_node::do_print(std::ostream &os, std::string indent) const noexcept {
+  os << get_node_name() << std::endl;
+  os << indent << "Function:" << std::endl << indent << "  ";
+  get_func().do_print(os, indent + "  ");
+  if(get_params().size() == 0) {
+    os << std::endl << indent << "Parameters: (none)";
+    return os;
+  }
+  os << std::endl << indent << "Parameters:" << std::endl;
+  std::string separator = "";
+  for(const auto &param : get_params()) {
+    os << separator << indent << "  ";
+    param->do_print(os, indent + "    ");
     separator = "\n";
   }
   return os;

@@ -71,30 +71,62 @@ std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_no
 
   token lookaheadt = *token_it;
   while(1) {
-    if(!operators.contains(lookaheadt.get_text())) {
-      if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
-        return result;
-      std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-      std::exit(1);
-    }
-    std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
-    if(lookahead.first < min_precedence) return result;
-    std::pair<int, binary_operator> op = lookahead;
-    token_it++;
-    std::unique_ptr<expression_node> rhs = parse_primary_expression(token_it);
-    while(1) {
+    if(lookaheadt.get_text() == "(") {
+      std::vector<std::unique_ptr<expression_node>> params;
+      token_it++;
+      for(lookaheadt = *token_it; lookaheadt.get_text() != ")"; token_it++) { // good ol' for abuse
+        if(lookaheadt.get_text() != ",") {
+          std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected comma, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+          std::exit(1);
+        }
+        token_it++;
+        if(lookaheadt.get_text() == ")") break; // Comma before end of parameter list? Ick, but okay.
+        params.push_back(parse_expression0(parse_primary_expression(token_it), 0, token_it));
+      }
+      token_it++;
       lookaheadt = *token_it;
+      result = std::make_unique<function_call_expression_node>(std::move(result), std::move(params));
+    } else {
       if(!operators.contains(lookaheadt.get_text())) {
         if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
-          break;
+          return result;
         std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
         std::exit(1);
       }
-      lookahead = operators[lookaheadt.get_text()];
-      if(lookahead.first <= op.first) break;
-      rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
+      std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
+      if(lookahead.first < min_precedence) return result;
+      std::pair<int, binary_operator> op = lookahead;
+      token_it++;
+      std::unique_ptr<expression_node> rhs = parse_primary_expression(token_it);
+      while(1) {
+        lookaheadt = *token_it;
+        if(lookaheadt.get_text() == "(") {
+          std::vector<std::unique_ptr<expression_node>> params;
+          token_it++;
+          for(lookaheadt = *token_it; lookaheadt.get_text() != ")"; token_it++) { // good ol' for abuse
+            if(lookaheadt.get_text() != ",") {
+              std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected comma, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+              std::exit(1);
+            }
+            token_it++;
+            if(lookaheadt.get_text() == ")") break; // Comma before end of parameter list? Ick, but okay.
+            params.push_back(parse_expression0(parse_primary_expression(token_it), 0, token_it));
+          }
+          rhs = std::make_unique<function_call_expression_node>(std::move(rhs), std::move(params));
+        } else {
+          if(!operators.contains(lookaheadt.get_text())) {
+            if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
+              break;
+            std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
+            std::exit(1);
+          }
+          lookahead = operators[lookaheadt.get_text()];
+          if(lookahead.first <= op.first) break;
+          rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
+        }
+      }
+      result = std::make_unique<binary_expression_node>(std::move(result), op.second, std::move(rhs));
     }
-    result = std::make_unique<binary_expression_node>(std::move(result), op.second, std::move(rhs));
   }
 }
 

@@ -146,6 +146,20 @@ class binary_expression_node : public expression_node {
     std::ostream &do_print(std::ostream &os, std::string indent) const noexcept override;
 };
 
+class function_call_expression_node : public expression_node {
+  private:
+    std::unique_ptr<expression_node> func;
+    std::vector<std::unique_ptr<expression_node>> params;
+
+  public:
+    function_call_expression_node(std::unique_ptr<expression_node> func,
+        std::vector<std::unique_ptr<expression_node>> params) noexcept;
+    [[nodiscard]] std::string_view get_node_name() const noexcept override;
+    [[nodiscard]] const expression_node &get_func() const noexcept;
+    [[nodiscard]] const std::vector<std::unique_ptr<expression_node>> &get_params() const noexcept;
+    std::ostream &do_print(std::ostream &os, std::string indent) const noexcept override;
+};
+
 class integer_expression_node : public value_node<int>, public expression_node {
   private:
     int value; // I'll fix this later
