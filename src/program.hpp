@@ -52,6 +52,16 @@ class binary_expression : public expression {
     void do_print(std::ostream &os, std::string leftpad);
 };
 
+class identifier_expression : public expression {
+  private:
+    std::string m_value;
+  public:
+    identifier_expression(std::string value);
+    std::string value() const;
+    type return_type() const;
+    void do_print(std::ostream &os, std::string leftpad);
+};
+
 class integer_expression : public expression {
   private:
     int m_value;
@@ -60,6 +70,18 @@ class integer_expression : public expression {
     int value() const;
     type return_type() const;
     void do_print(std::ostream &os, std::string leftpad);
+};
+
+class function_call_expression : public expression {
+  private:
+    std::unique_ptr<expression> m_func;
+    std::vector<std::unique_ptr<expression>> m_params;
+  public:
+    function_call_expression(std::unique_ptr<expression> func, std::vector<std::unique_ptr<expression>> params);
+    const expression& func() const;
+    const std::vector<std::unique_ptr<expression>>& params() const;
+    void do_print(std::ostream &os, std::string leftpad);
+    type return_type() const;
 };
 
 class function {
@@ -109,6 +131,15 @@ class incomplete_expression : public incomplete_statement {
     virtual std::unique_ptr<expression> to_expression_ptr() const = 0;
 };
 
+class incomplete_identifier_expression : public incomplete_expression {
+  private:
+    std::string m_value;
+  public:
+    std::unique_ptr<expression> to_expression_ptr() const;
+    identifier_expression to_identifier_expression() const;
+    void set_value(std::string value);
+};
+
 class incomplete_integer_expression : public incomplete_expression {
   private:
     int m_value;
@@ -116,6 +147,17 @@ class incomplete_integer_expression : public incomplete_expression {
     std::unique_ptr<expression> to_expression_ptr() const;
     integer_expression to_integer_expression() const;
     void set_value(int value);
+};
+
+class incomplete_function_call_expression : public incomplete_expression {
+  private:
+    std::unique_ptr<incomplete_expression> m_func;
+    std::vector<std::unique_ptr<incomplete_expression>> m_params;
+  public:
+    std::unique_ptr<expression> to_expression_ptr() const;
+    function_call_expression to_function_call_expression() const;
+    void set_func(std::unique_ptr<incomplete_expression> func);
+    void add_param(std::unique_ptr<incomplete_expression> param);
 };
 
 class incomplete_binary_expression : public incomplete_expression {

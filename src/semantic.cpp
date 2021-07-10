@@ -24,6 +24,21 @@ std::unique_ptr<incomplete_expression> convert_and_tag_expr(const expression_nod
         result.set_value(int_expr->get_value());
         return std::make_unique<incomplete_integer_expression>(result);
     }
+    const identifier_expression_node *id_expr = dynamic_cast<const identifier_expression_node*>(&expr);
+    if(id_expr) {
+        incomplete_identifier_expression result;
+        result.set_value(id_expr->get_value().get_value());
+        return std::make_unique<incomplete_identifier_expression>(result);
+    }
+    const function_call_expression_node *fn_expr = dynamic_cast<const function_call_expression_node*>(&expr);
+    if(fn_expr) {
+        incomplete_function_call_expression result;
+        result.set_func(convert_and_tag_expr(fn_expr->get_func()));
+        for(const auto &param : fn_expr->get_params()) {
+            result.add_param(convert_and_tag_expr(*param));
+        }
+        return std::make_unique<incomplete_function_call_expression>(std::move(result));
+    }
     std::abort();
 }
 

@@ -8,6 +8,20 @@ statement::~statement() {}
 
 expression::~expression() {}
 
+identifier_expression::identifier_expression(std::string value): m_value(value) {}
+
+void identifier_expression::do_print(std::ostream &os, std::string leftpad) {
+    os << "Identifier (" << m_value << ")";
+}
+
+std::string identifier_expression::value() const {
+    return m_value;
+}
+
+type identifier_expression::return_type() const {
+    return type(type_id::I32);
+}
+
 integer_expression::integer_expression(int value): m_value(value) {}
 
 void integer_expression::do_print(std::ostream &os, std::string leftpad) {
@@ -75,6 +89,49 @@ type binary_expression::return_type() const {
     return m_return_type;
 }
 
+function_call_expression::function_call_expression(std::unique_ptr<expression> func, std::vector<std::unique_ptr<expression>> params):
+    m_func(std::move(func)), m_params(std::move(params)) {}
+
+const expression& function_call_expression::func() const {
+    return *m_func;
+}
+
+const std::vector<std::unique_ptr<expression>>& function_call_expression::params() const {
+    return m_params;
+}
+
+void function_call_expression::do_print(std::ostream &os, std::string leftpad) {
+    os << "Function call expression" << std::endl << leftpad;
+
+    os << "Function: ";
+    m_func->do_print(os, leftpad + "  ");
+    os << std::endl << leftpad;
+
+    os << "Parameters:";
+    if(m_params.size() == 0)
+        os << " (none)";
+    else for(auto &param : m_params) {
+        os << std::endl << leftpad;
+        param->do_print(os, leftpad + "  ");
+    }
+}
+
+type function_call_expression::return_type() const {
+    return type(type_id::I32);
+}
+
+void incomplete_identifier_expression::set_value(std::string value) {
+    m_value = value;
+}
+
+identifier_expression incomplete_identifier_expression::to_identifier_expression() const {
+    return identifier_expression(m_value);
+}
+
+std::unique_ptr<expression> incomplete_identifier_expression::to_expression_ptr() const {
+    return std::make_unique<identifier_expression>(to_identifier_expression());
+}
+
 void incomplete_integer_expression::set_value(int value) {
     m_value = value;
 }
@@ -85,6 +142,26 @@ integer_expression incomplete_integer_expression::to_integer_expression() const 
 
 std::unique_ptr<expression> incomplete_integer_expression::to_expression_ptr() const {
     return std::make_unique<integer_expression>(to_integer_expression());
+}
+
+void incomplete_function_call_expression::set_func(std::unique_ptr<incomplete_expression> func) {
+    m_func = std::move(func);
+}
+
+void incomplete_function_call_expression::add_param(std::unique_ptr<incomplete_expression> param) {
+    m_params.push_back(std::move(param));
+}
+
+function_call_expression incomplete_function_call_expression::to_function_call_expression() const {
+    std::vector<std::unique_ptr<expression>> params;
+    for(auto &param : m_params) {
+        params.push_back(param->to_expression_ptr());
+    }
+    return function_call_expression(m_func->to_expression_ptr(), std::move(params));
+}
+
+std::unique_ptr<expression> incomplete_function_call_expression::to_expression_ptr() const {
+    return std::make_unique<function_call_expression>(to_function_call_expression());
 }
 
 std::unique_ptr<statement> incomplete_expression::to_statement_ptr() const {
