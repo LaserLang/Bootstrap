@@ -5,165 +5,157 @@
 
 namespace cannon {
 
-static char nextc(uint64_t &line, uint32_t &col, std::istream &file) {
+static char next_char(uint64_t &line, uint32_t &col, std::istream &input) {
     char next;
-    file.get(next);
+    input.get(next);
     if (next == '\n') {
         line++;
         col = 0;
     }
     col++; // If newline, sets col to 1
-    if (file.eof())
-        return 0; // Nobody is going to sensibly put a \0 in their code, and if
-                  // they do, it should validly be EOF.
+    if (input.eof())
+        return '\0'; // Nobody is going to sensibly put a \0 in their code, and if
+                     // they do, it should validly be EOF.
     return next;
 }
 
-std::vector<token> lex(std::istream &file) {
+std::vector<token> lex(std::istream &input) {
     auto result = std::vector<token>();
     uint64_t line = 1; // Why no 0 index? AAAA
     uint32_t col = 1;  // AAAA AAAA
 
     uint64_t cur_line = line;
     uint32_t cur_col = col;
-    char curc = nextc(line, col, file);
-    while (curc) {
+    char c = next_char(line, col, input); // the current char
+    while (c != '\0') {
         if ( // <c>
-            curc == '{' || curc == '}' || curc == '(' || curc == ')' ||
-            curc == ';' || curc == ',' || curc == '.' || curc == '\'' ||
-            curc == '"') {
-            std::string data(1, curc);
+            c == '{' || c == '}' || c == '(' || c == ')' ||
+            c == ';' || c == ',' || c == '.' || c == '\'' || c == '"'
+        ) {
+            std::string data(1, c);
             token t{cur_line, cur_col, data, SYMBOL};
             result.push_back(t);
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
+            c = next_char(line, col, input);
         } else if ( // <c>=, <c>
-            curc == '=' || curc == '*' || curc == '%' || curc == '^' ||
-            curc == '!' || curc == '~') {
-            std::string tok_str(1, curc);
+            c == '=' || c == '*' || c == '%' || c == '^' || c == '!' || c == '~'
+        ) {
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            if (curc == '=') {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            if (c == '=') {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
-        } else if (curc == '/') { // /=, //, /
-            std::string tok_str(1, curc);
+        } else if (c == '/') { // /=, //, /
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            if (curc == '=') {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            if (c == '=') {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
-            } else if (curc == '/') {
-                tok_str.push_back(curc);
+                c = next_char(line, col, input);
+            } else if (c == '/') {
                 while (
-                    curc !=
+                    c !=
                     '\n') { // Nobody needs to know the contents of the comment
                     cur_line = line;
                     cur_col = col;
-                    curc = nextc(line, col, file);
+                    c = next_char(line, col, input);
                 }
                 continue; // We don't need to store that there was a comment; that's not helpful.
             } // I have not decided how to tokenize multilines yet
             token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
         } else if ( // <c><c>, <c>=, <c>, ->
-            curc == '&' || curc == '|' || curc == '+' || curc == '-') {
-            char firstc = curc;
-            std::string tok_str(1, curc);
+            c == '&' || c == '|' || c == '+' || c == '-'
+        ) {
+            char firstc = c;
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            if (curc == '=' || curc == firstc ||
-                (firstc == '-' && curc == '>')) {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            if (c == '=' || c == firstc ||
+                (firstc == '-' && c == '>')) {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
-        } else if (curc == ' ' || curc == '\t' ||
-                   curc == '\r' || // If the C++ stl does it's job, this
-                                   // shouldn't be a problem.
-                   curc == '\n') {
+        } else if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-        } else if (curc == '>' || curc == '<') {
-            char firstc = curc;
-            std::string tok_str(1, curc);
+            c = next_char(line, col, input);
+        } else if (c == '>' || c == '<') {
+            char firstc = c;
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            if (curc == firstc) {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            if (c == firstc) {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
-            if (curc == '=') {
-                tok_str.push_back(curc);
+            if (c == '=') {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str, SYMBOL};
             result.push_back(t);
-        } else if (curc >= '0' && curc <= '9') {
-            std::string tok_str(1, curc);
+        } else if (c >= '0' && c <= '9') {
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            while (curc >= '0' && curc <= '9') {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            while (c >= '0' && c <= '9') {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str, NUMBER};
             result.push_back(t);
-        } else if ((curc >= 'a' && curc <= 'z') ||
-                   (curc >= 'A' && curc <= 'Z') || (curc == '_') ||
-                   (curc == '$')) {
-            std::string tok_str(1, curc);
+        } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '$') {
+            std::string tok_str(1, c);
             uint64_t tmp_cur_line = cur_line;
             uint32_t tmp_cur_col = cur_col;
             cur_line = line;
             cur_col = col;
-            curc = nextc(line, col, file);
-            while ((curc >= 'a' && curc <= 'z') ||
-                   (curc >= 'A' && curc <= 'Z') ||
-                   (curc >= '0' && curc <= '9') || (curc == '_') ||
-                   (curc == '$')) {
-                tok_str.push_back(curc);
+            c = next_char(line, col, input);
+            while ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$') {
+                tok_str.push_back(c);
                 cur_line = line;
                 cur_col = col;
-                curc = nextc(line, col, file);
+                c = next_char(line, col, input);
             }
             token t{tmp_cur_line, tmp_cur_col, tok_str, IDENTIFIER};
             result.push_back(t);
         } else {
-            std::cerr << "FATAL: Invalid character '" << curc << "'!";
+            std::cerr << "FATAL: Invalid character '" << c << "'!";
             throw "Invalid character"; // FIXME: Don't use exceptions
         }
     }

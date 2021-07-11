@@ -10,7 +10,7 @@ namespace cannon {
 enum token_type {
   SYMBOL,
   NUMBER,
-  IDENTIFIER
+  IDENTIFIER,
 };
 
 class token {

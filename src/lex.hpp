@@ -8,7 +8,7 @@
 
 namespace cannon {
 
-std::vector<token> lex(std::istream &file);
+std::vector<token> lex(std::istream &input);
 
 }
 
