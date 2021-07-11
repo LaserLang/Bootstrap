@@ -43,6 +43,7 @@ llvm::Value* codegen_expr(const expression &expr, llvm::LLVMContext &context, ll
     } else if(const integer_expression *int_expr = dynamic_cast<const integer_expression*>(&expr)) {
         return llvm::ConstantInt::get(context, llvm::APInt(32, int_expr->value() & 0x00000000FFFFFFFFULL, true));
     } else if(const function_call_expression *fn_expr = dynamic_cast<const function_call_expression*>(&expr)) {
+        static_cast<void>(fn_expr);
         std::cerr << "WIP" << std::endl;
         std::abort();
     } else {
