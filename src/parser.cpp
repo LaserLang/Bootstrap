@@ -9,208 +9,185 @@ using namespace std::string_view_literals;
 
 namespace cannon {
 
-std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::iterator &token_it) {
-  token cur_token = *(token_it++);
-  switch(cur_token.get_type()) {
-  case NUMBER:
-  {
-    int value = 0;
-    for(char c : cur_token.get_text()) {
-      value *= 10;
-      value += (c - '0');
-    }
-    cur_token = *token_it;
-    if(cur_token.get_text() == ".") {
-      token_it++;
-      token cur_token = *(token_it++);
-      switch(cur_token.get_type()) {
-      case NUMBER:
-      {
-        double value2 = 0;
-        for(char c : cur_token.get_text()) {
-          value2 += (c - '0');
-          value2 /= 10;
-        }
-        cur_token = *token_it;
-        if(cur_token.get_text() == ".") {
-          token_it++;
-        }
-        return std::make_unique<double_expression_node>(value+value2);
-      }
-      case IDENTIFIER:
-        std::cerr << "Calling functions on numbers is unimplemented!" << std::endl;
-        std::exit(1);
-      default:
-        std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected number or identifier, got \"" << cur_token.get_text() << "\"" << std::endl;
-        std::exit(1);
-      }
-    } else {
-      return std::make_unique<integer_expression_node>(value);
-    }
-  }
-  case IDENTIFIER:
-    return std::make_unique<identifier_expression_node>(std::make_unique<identifier_node>(cur_token.get_text()));
-  default:
-    std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected number or identifier, got \"" << cur_token.get_text() << "\"" << std::endl;
+std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it); // Why are we using C++ again?
+
+[[noreturn]] void syntax_error(token cur_token, std::string expected) {
+    std::cerr << cur_token.get_line() << ":" << cur_token.get_column() << ": Syntax error: expected " << expected << ", got \"" << cur_token.get_text() << "\"" << std::endl;
     std::exit(1);
-  }
 }
 
-std::map<std::string_view, std::pair<uint8_t, binary_operator>> operators {
-  {"+"sv, {1, ADD}},
-  {"-"sv, {1, SUB}},
-  {"*"sv, {2, MUL}},
-  {"/"sv, {2, DIV}}
+void expect(std::vector<token>::iterator &token_it, std::string expected, std::string description) {
+    token cur_token = *token_it;
+    if (cur_token.get_text() == expected) {
+        token_it++;
+    } else {
+        syntax_error(cur_token, description);
+    }
+}
+
+std::unique_ptr<expression_node> parse_primary_expression(std::vector<token>::iterator &token_it) {
+    token cur_token = *(token_it++);
+    switch (cur_token.get_type()) {
+      case NUMBER: {
+        int value = 0;
+        for (char c : cur_token.get_text()) {
+            // TODO: check for overflow
+            value *= 10;
+            value += (c - '0');
+        }
+        cur_token = *token_it;
+        if (cur_token.get_text() == ".") {
+            token_it++;
+            token cur_token = *(token_it++);
+            switch (cur_token.get_type()) {
+              case NUMBER: {
+                double value2 = 0;
+                for (char c : cur_token.get_text()) {
+                    value2 += (c - '0');
+                    value2 /= 10;
+                }
+                cur_token = *token_it;
+                if (cur_token.get_text() == ".") {
+                    token_it++;
+                }
+                return std::make_unique<double_expression_node>(value+value2);
+              }
+              case IDENTIFIER:
+                std::cerr << "Calling functions on numbers is not implemented!" << std::endl;
+                std::exit(1);
+              default:
+                syntax_error(*token_it, "number or identifier");
+            }
+        } else {
+            return std::make_unique<integer_expression_node>(value);
+        }
+      }
+      case IDENTIFIER:
+        return std::make_unique<identifier_expression_node>(std::make_unique<identifier_node>(cur_token.get_text()));
+      default:
+        if (cur_token.get_text() == "(") { // parenthesised expression
+            auto result = parse_expression(token_it);
+            expect(token_it, ")", "closing parenthesis");
+            return result;
+        }
+        syntax_error(cur_token, "primary expression");
+    }
+}
+
+std::map<std::string_view, std::pair<binary_operator, std::pair<uint8_t, uint8_t>>> operators {
+    {"+"sv, {ADD, {1, 2}}},
+    {"-"sv, {SUB, {1, 2}}},
+    {"*"sv, {MUL, {3, 4}}},
+    {"/"sv, {DIV, {3, 4}}},
 };
 
-std::unique_ptr<expression_node> parse_expression0(std::unique_ptr<expression_node> lhs, uint8_t min_precedence, std::vector<token>::iterator &token_it) {
-  // I hate expression parsing
-  // So, we basically just need to churn until we see ";", ",", ")", or "}".
+std::unique_ptr<expression_node> parse_expression_bp(uint8_t min_bp, std::vector<token>::iterator &token_it) {
+    // pratt parser
+    // see https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
 
-  std::unique_ptr<expression_node> result(std::move(lhs));
+    auto lhs = parse_primary_expression(token_it);
 
-  token lookaheadt = *token_it;
-  while(1) {
-    if(lookaheadt.get_text() == "(") {
-      std::vector<std::unique_ptr<expression_node>> params;
-      token_it++;
-      for(lookaheadt = *token_it; lookaheadt.get_text() != ")"; token_it++) { // good ol' for abuse
-        if(lookaheadt.get_text() != ",") {
-          std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected comma, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-          std::exit(1);
-        }
-        token_it++;
-        if(lookaheadt.get_text() == ")") break; // Comma before end of parameter list? Ick, but okay.
-        params.push_back(parse_expression0(parse_primary_expression(token_it), 0, token_it));
-      }
-      token_it++;
-      lookaheadt = *token_it;
-      result = std::make_unique<function_call_expression_node>(std::move(result), std::move(params));
-    } else {
-      if(!operators.contains(lookaheadt.get_text())) {
-        if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
-          return result;
-        std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-        std::exit(1);
-      }
-      std::pair<int, binary_operator> lookahead = operators[lookaheadt.get_text()];
-      if(lookahead.first < min_precedence) return result;
-      std::pair<int, binary_operator> op = lookahead;
-      token_it++;
-      std::unique_ptr<expression_node> rhs = parse_primary_expression(token_it);
-      while(1) {
-        lookaheadt = *token_it;
-        if(lookaheadt.get_text() == "(") {
-          std::vector<std::unique_ptr<expression_node>> params;
-          token_it++;
-          for(lookaheadt = *token_it; lookaheadt.get_text() != ")"; token_it++) { // good ol' for abuse
-            if(lookaheadt.get_text() != ",") {
-              std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected comma, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-              std::exit(1);
+    while (true) {
+        token lookahead = (*token_it);
+        if (lookahead.get_text() == "(") { // function call
+            token_it++; // skip "("
+            std::vector<std::unique_ptr<expression_node>> params;
+            lookahead = *token_it;
+            while (lookahead.get_text() != ")") { // good ol' for abuse
+                params.push_back(parse_expression(token_it));
+                lookahead = *token_it;
+                std::cout << "parsed expression, now at " << lookahead.get_line() << ":" << lookahead.get_column() << " '" << lookahead.get_text() << "'" << std::endl;
+                if (lookahead.get_text() == ")") break;
+                expect(token_it, ",", "comma");
+                lookahead = *token_it;
+                std::cout << "parsed comma, now at " << lookahead.get_line() << ":" << lookahead.get_column() << " '" << lookahead.get_text() << "'" << std::endl;
             }
-            token_it++;
-            if(lookaheadt.get_text() == ")") break; // Comma before end of parameter list? Ick, but okay.
-            params.push_back(parse_expression0(parse_primary_expression(token_it), 0, token_it));
-          }
-          rhs = std::make_unique<function_call_expression_node>(std::move(rhs), std::move(params));
+            token_it++; // skip ")"
+            lhs = std::make_unique<function_call_expression_node>(std::move(lhs), std::move(params));
         } else {
-          if(!operators.contains(lookaheadt.get_text())) {
-            if(lookaheadt.get_text() == ";" || lookaheadt.get_text() == "," || lookaheadt.get_text() == ")" || lookaheadt.get_text() == "}")
-              break;
-            std::cerr << lookaheadt.get_line() << ":" << lookaheadt.get_column() << ": Syntax error: expected operator, comma, end of block, end of group, or end of statement, got \"" << lookaheadt.get_text() << "\"" << std::endl;
-            std::exit(1);
-          }
-          lookahead = operators[lookaheadt.get_text()];
-          if(lookahead.first <= op.first) break;
-          rhs = parse_expression0(std::move(rhs), lookahead.first, token_it);
+            if (!operators.contains(lookahead.get_text())) break;
+            auto op = operators[lookahead.get_text()];
+            uint8_t l_bp = op.second.first;
+            uint8_t r_bp = op.second.second;
+            if (l_bp < min_bp) break;
+            token_it++; // skip operator
+            auto rhs = parse_expression_bp(r_bp, token_it);
+            lhs = std::make_unique<binary_expression_node>(std::move(lhs), op.first, std::move(rhs));
         }
-      }
-      result = std::make_unique<binary_expression_node>(std::move(result), op.second, std::move(rhs));
     }
-  }
+
+    return lhs;
 }
 
 std::unique_ptr<expression_node> parse_expression(std::vector<token>::iterator &token_it) {
-  return parse_expression0(parse_primary_expression(token_it), 0, token_it);
+    return parse_expression_bp(0, token_it);
 }
 
 identifier_node parse_identifier(std::vector<token>::iterator &token_it) {
-  identifier_node result((*token_it).get_text());
-  token_it++;
-  return result;
+    token cur_token = *token_it;
+    if (cur_token.get_type() != IDENTIFIER)
+        syntax_error(cur_token, "identifier");
+    identifier_node result(cur_token.get_text());
+    token_it++;
+    return result;
 }
 
 type_node parse_type(std::vector<token>::iterator &token_it) {
-  type_node result(std::make_unique<identifier_node>(parse_identifier(token_it)));
-  return result;
+    return type_node(std::make_unique<identifier_node>(parse_identifier(token_it)));
 }
 
 block_expression_node parse_block_expression(std::vector<token>::iterator &token_it) {
-  std::vector<std::unique_ptr<statement_node>> statements;
+    std::vector<std::unique_ptr<statement_node>> statements;
 
-  if((*token_it).get_text() != "{") {
-    std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected \"{\", got \"" << (*token_it).get_text() << "\"" << std::endl;
-    std::exit(1);
-  }
-  while((*(token_it++)).get_text() != "}") {
-    // TODO: parse non-expression statements
-    statements.push_back(parse_expression(token_it));
-  }
+    expect(token_it, "{", "\"{\"");
+    while ((*token_it).get_text() != "}") {
+        // TODO: parse non-expression statements
+        statements.push_back(parse_expression(token_it));
+    }
+    token_it++; // skip "}"
 
-  block_expression_node result(std::move(statements));
-  return result;
+    return block_expression_node(std::move(statements));
 }
 
 fn_node parse_fn(std::vector<token>::iterator &token_it) {
-  if((*token_it).get_text() != "fn") {
-    std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected function, got \"" << (*token_it).get_text() << "\"" << std::endl;
-    std::exit(1);
-  }
-  token_it++;
+    expect(token_it, "fn", "function");
 
-  std::unique_ptr<identifier_node> name = std::make_unique<identifier_node>(parse_identifier(token_it));
-  
-  if((*token_it).get_text() != "(") {
-    std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected \"(\", got \"" << (*token_it).get_text() << "\"" << std::endl;
-    std::exit(1);
-  }
-  std::vector<std::unique_ptr<parameter_node>> parameters;
-  while((*(token_it++)).get_text() != ")") {
-    // TODO: parse parameters
-  }
+    std::unique_ptr<identifier_node> name = std::make_unique<identifier_node>(parse_identifier(token_it));
 
-  std::unique_ptr<type_node> return_type;
+    expect(token_it, "(", "\"(\"");
+    std::vector<std::unique_ptr<parameter_node>> parameters;
+    while ((*token_it).get_text() != ")") {
+        // TODO: parse parameters
+        token_it++;
+    }
+    token_it++; // skip ")"
 
-  if((*token_it).get_text() == "->") {
-    token_it++;
-    return_type = std::make_unique<type_node>(parse_type(token_it));
-  }
+    std::unique_ptr<type_node> return_type;
 
-  std::unique_ptr<block_expression_node> code = std::make_unique<block_expression_node>(parse_block_expression(token_it));
+    if ((*token_it).get_text() == "->") {
+        token_it++;
+        return_type = std::make_unique<type_node>(parse_type(token_it));
+    }
 
-  fn_node result(std::move(name), std::move(parameters), std::move(return_type), std::move(code));
+    auto code = std::make_unique<block_expression_node>(parse_block_expression(token_it));
 
-  return result;
+    return fn_node(std::move(name), std::move(parameters), std::move(return_type), std::move(code));
 }
 
 file_node parse_file(std::vector<token> tokens) {
-  std::vector<std::unique_ptr<item_node>> items;
+    std::vector<std::unique_ptr<item_node>> items;
 
-  auto token_it = tokens.begin();
-  while(token_it != tokens.end()) {
-    if((*token_it).get_text() == "//") continue;
-    if((*token_it).get_text() == "fn") {
-      std::unique_ptr<item_node> item = std::make_unique<fn_node>(parse_fn(token_it));
-      items.push_back(std::move(item));
-    } else {
-      std::cerr << (*token_it).get_line() << ":" << (*token_it).get_column() << ": Syntax error: expected function, got \"" << (*token_it).get_text() << "\"" << std::endl;
-      std::exit(1);
+    auto token_it = tokens.begin();
+    while (token_it != tokens.end()) {
+        if ((*token_it).get_text() == "fn") {
+            std::unique_ptr<item_node> item = std::make_unique<fn_node>(parse_fn(token_it));
+            items.push_back(std::move(item));
+        } else {
+            syntax_error(*token_it, "function");
+        }
     }
-  }
 
-  file_node result(std::move(items));
-
-  return result;
+    return file_node(std::move(items));
 }
 
 }
